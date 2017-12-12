@@ -1,0 +1,23 @@
+.grid.ad-grid {
+    overflow: visible;
+
+    .grid__item--ads {
+        position: relative;
+        overflow: visible;
+
+        & > * {
+            overflow: visible;
+       }
+    }
+
+    .ad-sticky {
+        position: sticky;
+        top: 1px;
+    }
+}
+
+@include mq($from: gel3) {
+    .grid__item--ads {
+        order: 2;
+    }
+}

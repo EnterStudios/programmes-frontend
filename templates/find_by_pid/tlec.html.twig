@@ -53,6 +53,19 @@
         <div class="leading-gap cf">
             <h2 class="invisible">{{ tr('supporting_content') }}</h2>
             {#{%- if programme.getOption('prioritytext_block') or isbbcdotcom or hasrecipes -%} TODO #}
+            {% set grid_item_widths = '1/2@gel3 1/3@gel3b 1/4@gel5' %}
+            {% if hasAdverts %}
+                {% set grid_item_widths = '1/2@gel3b 1/3@gel5' %}
+                <div class="grid grid--flush ad-grid">
+                    <div class="grid__item grid__item--ads 1/2@gel3 1/3@gel3b 1/4@gel5">
+                        <div>
+                            <div class="ad-sticky">
+                                {{ advert('mpu', [1,2,3,4]) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid__item 1/2@gel3 2/3@gel3b 3/4@gel5">
+            {% endif %}
             {%- if programme.getOption('prioritytext_block') -%}
                 <ul class="grid">
                     {%- if programme.getOption('prioritytext_block') -%}
@@ -65,15 +78,13 @@
                             </div>
                         </li>
                     {%- endif -%}
-
-                    {# TODO MPU Advert #}
                 </ul>
             {%- endif -%}
 
             {%- if promotions or clips or galleries -%}
                 <ul class="grid">
                     {%- if programme.getOption('recipes_enabled') -%}
-                        <li class="grid__item 1/2@gel3 1/3@gel3b 1/4@gel5 gel-brevier-bold lazy-module box-link"
+                        <li class="grid__item gel-brevier-bold lazy-module box-link {{ grid_item_widths }}"
                              data-lazyload-inc="{{ path('programme_recipes', {'pid': programme.getPid(), 'extension': '.ameninc'}) }}"
                              data-lazyload-threshold="320"
                              data-lazyload-delay="true"
@@ -99,7 +110,7 @@
                             {%- set img_sizes = { 600 : 1/1, 768 : 2/3, 1008 : '645px', 1280 : '600px'} -%}
                             {%- set img_default_width = 640 -%}
                         {%- else -%}
-                            {%- set promo_widths = '1/2@gel3 1/3@gel3b 1/4@gel5' -%}
+                            {%- set promo_widths = grid_item_widths -%}
                             {%- set img_sizes = { 600 : 1/2, 768 : 1/3, 1008 : '315px', 1280 : '300px'} -%}
                             {%- set img_default_width = 320 -%}
                         {%- endif -%}
@@ -120,7 +131,7 @@
                     {%- endfor -%}
 
                     {%- for clip in clips -%}
-                        <li class="grid__item 1/2@gel3 1/3@gel3b 1/4@gel5 {{ loop.last ? 'grid__item--column' : ''}}">
+                        <li class="grid__item {{ grid_item_widths }} {{ loop.last ? 'grid__item--column' : ''}}">
                             {{ ds_amen('programme', clip, {
                                 'context_programme': programme.isRadio() ? clip : programme,
                                 'branding_name': 'secondary',
@@ -154,7 +165,7 @@
 
 
                     {%- for gallery in galleries -%}
-                        <li class="grid__item 1/2@gel3 1/3@gel3b 1/4@gel5 {{ loop.last ? 'grid__item--column' : ''}}">
+                        <li class="grid__item {{ grid_item_widths }} {{ loop.last ? 'grid__item--column' : ''}}">
                             {{- ds_amen('group', gallery, {
                                 'context_programme': (programme.isRadio() and gallery.getParent()) ? gallery.getParent() : programme,
                                 'branding_name': 'secondary',
@@ -188,13 +199,16 @@
             {%- if supportingContentItems -%}
                 <ul class="grid">
                     {%- for supportingContentItem in supportingContentItems -%}
-                        <li class="1/2@gel4 grid__item">
+                        <li class="grid__item {{ hasAdverts ? '' : '1/2@gel4' }}">
                             {{- ds_amen('supportingContent', supportingContentItem) -}}
                         </li>
                     {%- endfor -%}
                 </ul>
             {%- endif -%}
-
+            {% if hasAdverts %}
+                </div>
+            </div>
+            {% endif %}
             {# TODO Regular Vote block #}
         </div>
     </div>
