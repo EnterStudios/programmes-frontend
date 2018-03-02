@@ -3,8 +3,10 @@ declare(strict_types = 1);
 
 namespace App\Controller\ProgrammeEpisodes;
 
+use App\Controller\Helpers\StructuredDataHelper;
 use App\Ds2013\PresenterFactory;
 use App\Ds2013\Presenters\Utilities\Paginator\PaginatorPresenter;
+use BBC\ProgrammesPagesService\Domain\Entity\Episode;
 use BBC\ProgrammesPagesService\Domain\Entity\ProgrammeContainer;
 use BBC\ProgrammesPagesService\Service\CollapsedBroadcastsService;
 use BBC\ProgrammesPagesService\Service\ProgrammesAggregationService;
@@ -15,7 +17,8 @@ class PlayerController extends BaseProgrammeEpisodesController
         CollapsedBroadcastsService $collapsedBroadcastService,
         PresenterFactory $presenterFactory,
         ProgrammeContainer $programme,
-        ProgrammesAggregationService $programmeAggregationService
+        ProgrammesAggregationService $programmeAggregationService,
+        StructuredDataHelper $structuredDataHelper
     ) {
         $this->setContextAndPreloadBranding($programme);
         $this->setIstatsProgsPageType('episodes_player');
@@ -50,12 +53,33 @@ class PlayerController extends BaseProgrammeEpisodesController
         );
 
         $subNavPresenter = $this->getSubNavPresenter($collapsedBroadcastService, $programme, $presenterFactory);
+        $schema = $this->getSchema($structuredDataHelper, $programme, $availableEpisodes);
 
         return $this->renderWithChrome('programme_episodes/player.html.twig', [
             'programme' => $programme,
             'availableEpisodes' => $availableEpisodes,
             'paginatorPresenter' => $paginator,
             'subNavPresenter' => $subNavPresenter,
+            'schema' => $schema,
         ]);
+    }
+
+    /**
+     * @param StructuredDataHelper $structuredDataHelper
+     * @param ProgrammeContainer $programmeContainer
+     * @param Episode[] $availableEpisodes
+     * @return array
+     */
+    private function getSchema(StructuredDataHelper $structuredDataHelper, ProgrammeContainer $programmeContainer, array $availableEpisodes): array
+    {
+        $schemaContext = $this->getSchemaForProgrammeContainerAndParents($structuredDataHelper, $programmeContainer);
+
+        foreach ($availableEpisodes as $episode) {
+            $episodeSchema = $structuredDataHelper->getSchemaForEpisode($episode, false);
+            $episodeSchema['publication'] = $structuredDataHelper->getSchemaForOnDemand($episode);
+            $schemaContext['episode'][] = $episodeSchema;
+        }
+
+        return $structuredDataHelper->prepare($schemaContext);
     }
 }

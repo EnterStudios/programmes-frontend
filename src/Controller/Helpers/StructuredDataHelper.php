@@ -8,6 +8,7 @@ use BBC\ProgrammesPagesService\Domain\Entity\Clip;
 use BBC\ProgrammesPagesService\Domain\Entity\CollapsedBroadcast;
 use BBC\ProgrammesPagesService\Domain\Entity\Episode;
 use BBC\ProgrammesPagesService\Domain\Entity\ProgrammeContainer;
+use BBC\ProgrammesPagesService\Domain\Entity\Series;
 use BBC\ProgrammesPagesService\Domain\Entity\Service;
 
 /**
@@ -75,8 +76,8 @@ class StructuredDataHelper
             return $this->schemaHelper->getSchemaForSeries($programmeContainer);
         }
 
-        // @Todo add schema.org markup for non TLEO containers
-        return [];
+        /** @var Series $programmeContainer */
+        return $this->schemaHelper->getSchemaForSeason($programmeContainer);
     }
 
     public function buildSchemaForClip(Clip $clip) :array

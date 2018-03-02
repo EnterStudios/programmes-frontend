@@ -1,16 +1,24 @@
 <?php
 declare(strict_types = 1);
+
 namespace App\Controller\ProgrammeEpisodes;
 
+use App\Controller\Helpers\StructuredDataHelper;
+use App\Controller\Traits\IndexerTrait;
 use App\Ds2013\PresenterFactory;
 use App\Ds2013\Presenters\Utilities\Paginator\PaginatorPresenter;
+use BBC\ProgrammesPagesService\Domain\Entity\CollapsedBroadcast;
+use BBC\ProgrammesPagesService\Domain\Entity\Episode;
 use BBC\ProgrammesPagesService\Domain\Entity\ProgrammeContainer;
+use BBC\ProgrammesPagesService\Domain\Entity\Series;
 use BBC\ProgrammesPagesService\Service\CollapsedBroadcastsService;
 use BBC\ProgrammesPagesService\Service\ProgrammesService;
 use Symfony\Component\HttpFoundation\Request;
 
 class GuideController extends BaseProgrammeEpisodesController
 {
+    use IndexerTrait;
+
     const LIMIT = 30;
 
     public function __invoke(
@@ -18,7 +26,8 @@ class GuideController extends BaseProgrammeEpisodesController
         PresenterFactory $presenterFactory,
         ProgrammesService $programmesService,
         CollapsedBroadcastsService $collapsedBroadcastService,
-        Request $request
+        Request $request,
+        StructuredDataHelper $structuredDataHelper
     ) {
         $this->setContextAndPreloadBranding($programme);
         $this->setInternationalStatusAndTimezoneFromContext($programme);
@@ -51,26 +60,41 @@ class GuideController extends BaseProgrammeEpisodesController
         $subNavPresenter = $this->getSubNavPresenter($collapsedBroadcastService, $programme, $presenterFactory);
         $upcomingBroadcasts = $this->getUpcomingBroadcastsIndexedByProgrammePid($programme, $collapsedBroadcastService);
 
+        $schema = $this->getSchema($structuredDataHelper, $programme, $children, $upcomingBroadcasts);
+
         return $this->renderWithChrome('programme_episodes/guide.html.twig', [
             'programme' => $programme,
             'children' => $children,
             'paginatorPresenter' => $paginator,
             'subNavPresenter' => $subNavPresenter,
             'upcomingBroadcasts' => $upcomingBroadcasts,
+            'schema' => $schema,
         ]);
     }
 
-    protected function getUpcomingBroadcastsIndexedByProgrammePid(
-        ProgrammeContainer $programme,
-        CollapsedBroadcastsService $collapsedBroadcastsService
-    ): array {
-        $broadcasts = $collapsedBroadcastsService->findUpcomingByProgrammeWithFullServicesOfNetworksList($programme);
-        $upcoming = [];
+    /**
+     * @param StructuredDataHelper $structuredDataHelper
+     * @param ProgrammeContainer $programmeContainer
+     * @param (Episode|Series)[] $children
+     * @param CollapsedBroadcast[] $upcomingBroadcast
+     * @return array
+     */
+    private function getSchema(StructuredDataHelper $structuredDataHelper, ProgrammeContainer $programmeContainer, array $children, array $upcomingBroadcast): array
+    {
+        $schemaContext = $this->getSchemaForProgrammeContainerAndParents($structuredDataHelper, $programmeContainer);
 
-        foreach ($broadcasts as $broadcast) {
-            $upcoming[(string) $broadcast->getProgrammeItem()->getPid()] = $broadcast;
+        foreach ($children as $child) {
+            if ($child instanceof Series) {
+                $schemaContext['containsSeason'][] = $structuredDataHelper->getSchemaForProgrammeContainer($child);
+            } elseif (isset($upcomingBroadcast[(string) $child->getPid()])) {
+                $schemaContext['episode'][] = $structuredDataHelper->getSchemaForCollapsedBroadcast($upcomingBroadcast[(string) $child->getPid()]);
+            } elseif ($child->isStreamable()) {
+                $schemaContext['episode'][] = $structuredDataHelper->getSchemaForOnDemand($child);
+            } else {
+                $schemaContext['episode'][] = $structuredDataHelper->getSchemaForEpisode($child, false);
+            }
         }
 
-        return $upcoming;
+        return $structuredDataHelper->prepare($schemaContext);
     }
 }

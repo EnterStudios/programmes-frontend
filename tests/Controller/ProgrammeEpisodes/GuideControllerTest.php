@@ -29,7 +29,7 @@ class GuideControllerTest extends BaseWebTestCase
         $this->assertEquals(1, $crawler->filter('.footer')->count(), 'NON Partial-templates should include a footer');
         // assert guide items
         $this->assertEquals(3, $crawler->filter('.js-guideitem')->count());
-        $this->assertEquals(2, $crawler->filter('[typeof="Season"]')->count());
+        $this->assertEquals(2, $crawler->filter('.episode-guide__series-container')->count());
         $this->assertEquals(1, $crawler->filter('.js-guideitem .programme--episode')->count());
         // assert guide items order
         $this->assertEquals(['B1-S2', 'B1-S1', 'B1-E1'], $this->findAllTitles($crawler));

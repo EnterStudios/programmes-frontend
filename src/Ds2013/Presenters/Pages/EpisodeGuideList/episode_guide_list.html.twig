@@ -3,9 +3,8 @@
         <li>
             {#SERIES DROPDOWN#}
             {%- if programme.getType() == 'series' -%}
-                <div typeof="Season"
-                     resource="{{ path('find_by_pid', {'pid': programme.getPid()}) }}"
-                     class="js-guideitem highlight-box--list br-keyline br-blocklink-page br-page-linkhover-onbg015--hover"
+                <div resource="{{ path('find_by_pid', {'pid': programme.getPid()}) }}"
+                     class="js-guideitem highlight-box--list br-keyline br-blocklink-page br-page-linkhover-onbg015--hover episode-guide__series-container"
                      data-inactiveclass="js-guideitem highlight-box--list br-keyline br-blocklink-page br-page-linkhover-onbg015--hover"
                      data-activeclass="js-guideitem br-box-subtle island js-active"
                      data-fetched="false"
@@ -14,8 +13,7 @@
                     <span class="loading-spinner pull--right-spaced hidden js-inprogress-showme"></span>
 
                     {#Title of this season#}
-                    <a property="url"
-                       resource="{{ path('find_by_pid', {'pid': programme.getPid()}) }}"
+                    <a resource="{{ path('find_by_pid', {'pid': programme.getPid()}) }}"
                        class="js-serieslink istats-seriesopen block-link link-complex"
                        href="{{ path('programme_episodes_guide', {'pid': programme.getPid()}) }}"
                        aria-expanded="false"
@@ -29,7 +27,7 @@
                     </a>
 
                     <div class="nested-panel hidden js-active-showme" id="series-{{ programme.getPid() }}" aria-hidden="true">
-                        <p class="no-margin island--vertical" property="description">{{ programme.getShortSynopsis() }}</p>
+                        <p class="no-margin island--vertical">{{ programme.getShortSynopsis() }}</p>
                         <div class="js-seriescontent" id="series-content-{{ programme.getPid() }}">
                             {#EPISODES/NESTED SERIES LIST (lazy content)#}
                         </div>
@@ -40,7 +38,7 @@
                 </div>
             {%- else -%}
                 {#EPISODE#}
-                <div class="js-guideitem highlight-box--list block-link block-link--steal br-keyline br-blocklink-page br-page-linkhover-onbg015--hover">
+                <div class="js-guideitem highlight-box--list block-link block-link--steal br-keyline br-blocklink-page br-page-linkhover-onbg015--hover episode-guide__episode-container">
                     <div class="grid-wrapper">
                         <div class="grid 2/3@bpw2 2/3@bpe">
                             {{ ds2013('programme', programme, {

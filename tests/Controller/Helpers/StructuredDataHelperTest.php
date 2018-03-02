@@ -168,7 +168,7 @@ class StructuredDataHelperTest extends TestCase
         $this->assertFalse($series->isTlec());
     }
 
-    public function testTlecProgrammesHasRightInformation()
+    public function testTlecProgrammeContainerHasRightInformation()
     {
         $series = SeriesBuilder::any()->with([
             'masterBrand' => MasterBrandBuilder::anyRadioMasterBrand()->build(),
@@ -186,6 +186,26 @@ class StructuredDataHelperTest extends TestCase
         ], $containerSchema);
 
         $this->assertEquals('RadioSeries', $containerSchema['@type']);
+    }
+
+    public function testNonTlecProgrammeContainerHasRightInformation()
+    {
+        $series = SeriesBuilder::any()->with([
+            'masterBrand' => MasterBrandBuilder::anyRadioMasterBrand()->build(),
+            'parent' => SeriesBuilder::any()->build(),
+        ])->build();
+
+        $containerSchema = $this->helper()->getSchemaForProgrammeContainer($series);
+
+        $this->assertKeys([
+            '@type',
+            'identifier',
+            'position',
+            'name',
+            'url',
+        ], $containerSchema);
+
+        $this->assertEquals('RadioSeason', $containerSchema['@type']);
     }
 
     /**
