@@ -1,7 +1,7 @@
 .grid.ad-grid {
     overflow: visible;
 
-    .grid__item--ads {
+    .ad-grid__right {
         position: relative;
         overflow: visible;
 
@@ -15,9 +15,74 @@
         top: 1px;
     }
 }
+// 1/2@gel3 1/3@gel3b 1/4@gel5
+// 1/2@gel3 2/3@gel3b 3/4@gel5
+
+//1/2@gel3b 1/3@gel5
 
 @include mq($from: gel3) {
     .grid__item--ads {
         order: 2;
+    }
+
+    .ad-grid {
+        .brand-page-card {
+            width: 100%;
+        }
+
+        .ad-grid__left {
+            width: 50%;
+        }
+
+        .ad-grid__right {
+            order: 2;
+            width: 50%;
+        }
+    }
+}
+
+@include mq($from: gel3b) {
+    .ad-grid {
+        .brand-page-card {
+            width: 50%;
+        }
+
+        .brand-page-card--doublewide {
+            width: 100%;
+        }
+
+        .ad-grid__left {
+            width: 66.66%;
+        }
+
+        .ad-grid__right {
+            width: 33.33%;
+        }
+    }
+}
+
+@include mq($from: gel4) {
+    .ad-grid .brand-supporting-content {
+        width: 100%;
+    }
+}
+
+@include mq($from: gel5) {
+    .ad-grid {
+        .brand-page-card {
+            width: 33.33%;
+        }
+
+        .brand-page-card--doublewide {
+            width: 66.66%;
+        }
+
+        .ad-grid__left {
+            width: 75%;
+        }
+
+        .ad-grid__right {
+            width: 25%;
+        }
     }
 }
