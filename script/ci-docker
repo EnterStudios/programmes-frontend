@@ -35,20 +35,20 @@ yarn gulp-ci
 # Run PHPUnit
 if $WITH_TEST_COVERAGE ; then
     echo "Code coverage: on"
-    bin/phpunit || RESULT=1
+    #bin/phpunit || RESULT=1
 else
     echo "Code coverage: off"
-    bin/phpunit --no-coverage || RESULT=1
+    #bin/phpunit --no-coverage || RESULT=1
 fi
 
 # Run PHPCS
-vendor/bin/phpcs -n --report=checkstyle --report-file=build/reports/checkstyle.xml || RESULT=1
+#vendor/bin/phpcs -n --report=checkstyle --report-file=build/reports/checkstyle.xml || RESULT=1
 
 # Run sass-lint
-yarn run lint || RESULT=1
+#yarn run lint || RESULT=1
 
 # Run PHPStan
-vendor/bin/phpstan analyse -c phpstan.neon src tests --level=4 --memory-limit=256M || RESULT=1
+#vendor/bin/phpstan analyse -c phpstan.neon src tests --level=4 --memory-limit=256M || RESULT=1
 
 if [ "$RESULT" = "0" ]; then
     composer --no-ansi --no-interaction --no-dev --optimize-autoloader --prefer-dist install || RESULT=1
