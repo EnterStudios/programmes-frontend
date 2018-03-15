@@ -50,21 +50,19 @@
     {% endif %}
 
     <div class="p-g-p">
-        <div class="leading-gap cf">
-            <h2 class="invisible">{{ tr('supporting_content') }}</h2>
-            {#{%- if programme.getOption('prioritytext_block') or isbbcdotcom or hasrecipes -%} TODO #}
-            <div class="grid grid--flush" id="brand-outer-grid">
+        <div class="leading-gap cf grid {% if hasAdverts %} mpu-grid{% endif %}">
             {% if hasAdverts %}
-                <div class="grid__item ad-grid__right">
+                <div class="grid__item mpu-grid__right">
                     <div>
-                        <div class="ad-sticky">
-                            <h1 style="border: 1px solid blue">THIS IS A BIG FAT ADVERT</h1>
-                            {{ advert('mpu', [1,2,3,4]) }}
-                        </div>
+                        <h1 style="border: 1px solid blue">THIS IS A BIG FAT ADVERT</h1>
+                        {{ advert('mpu', [1,2,3,4]) }}
                     </div>
                 </div>
             {% endif %}
-                <div class="grid__item ad-grid__left">
+            <div class="grid__item mpu-grid__left">
+                <div>
+                    <h2 class="invisible">{{ tr('supporting_content') }}</h2>
+                    {#{%- if programme.getOption('prioritytext_block') or isbbcdotcom or hasrecipes -%} TODO #}
                     {%- if programme.getOption('prioritytext_block') -%}
                         <ul class="grid">
                             {%- if programme.getOption('prioritytext_block') -%}
@@ -77,17 +75,19 @@
                                     </div>
                                 </li>
                             {%- endif -%}
+
+                            {# TODO MPU Advert #}
                         </ul>
                     {%- endif -%}
 
                     {%- if promotions or clips or galleries -%}
                         <ul class="grid">
                             {%- if programme.getOption('recipes_enabled') -%}
-                                <li class="grid__item gel-brevier-bold lazy-module box-link brand-page-card"
-                             data-lazyload-inc="{{ path('programme_recipes', {'pid': programme.getPid(), 'extension': '.ameninc'}) }}"
+                                <li class="grid__item tlec-page-card gel-brevier-bold lazy-module box-link"
+                                     data-lazyload-inc="{{ path('partial_programme_recipes', {'pid': programme.getPid()}) }}"
                                      data-lazyload-threshold="320"
-                                     data-lazyload-delay="true">
-                             data-object-type="recipe">
+                                     data-lazyload-delay="true"
+                                     data-object-type="recipe">
                                     <div class="br-box-secondary">
                                             <div class="island">
                                                 <h4 class="gel-pica-bold media__meta-group">
@@ -105,17 +105,17 @@
                             {%- for promotion in promotions -%}
                                 {# @TODO should this be moved out into a page presenter or something. It's fugly #}
                                 {%- if loop.first and programme.getOption('double_width_first_promo') -%}
-                                    {%- set promo_class = 'brand-page-card--doublewide' -%}
+                                    {%- set promo_class = 'tlec-page-card--doublewidth' -%}
                                     {%- set img_sizes = { 600 : 1/1, 768 : 2/3, 1008 : '645px', 1280 : '600px'} -%}
                                     {%- set img_default_width = 640 -%}
                                 {%- else -%}
-                                    {%- set promo_class = 'brand-page-card' -%}
+                                    {%- set promo_class = 'tlec-page-card' -%}
                                     {%- set img_sizes = { 600 : 1/2, 768 : 1/3, 1008 : '315px', 1280 : '300px'} -%}
                                     {%- set img_default_width = 320 -%}
                                 {%- endif -%}
                                 <li class="grid__item {{ promo_class }}">
                                     {{- ds_amen('promotion', promotion, {
-                                'h_tag': 'h3',
+                                        'h_tag': 'h3',
                                         'related_links_count': 2,
                                         'img_sizes': img_sizes,
                                         'img_default_width': img_default_width,
@@ -124,18 +124,18 @@
                                         'cta_class': 'cta br-box-secondary',
                                         'branding_name': 'secondary',
                                         'link_location_prefix': 'promo_' ~ loop.index ~ '_',
-                                'show_synopsis': programme.isRadio(),
+                                        'show_synopsis': programme.isRadio(),
                                     }) -}}
                                 </li>
                             {%- endfor -%}
 
                             {%- for clip in clips -%}
-                                <li class="grid__item brand-page-card {{ loop.last ? 'grid__item--column' : ''}}">
+                                <li class="grid__item tlec-page-card {{ loop.last ? 'grid__item--column' : ''}}">
                                     {{ ds_amen('programme', clip, {
-                                'context_programme': programme.isRadio() ? clip : programme,
+                                        'context_programme': programme.isRadio() ? clip : programme,
                                         'branding_name': 'secondary',
                                         'title_options': {
-                                    'h_tag': 'h3',
+                                            'h_tag': 'h3',
                                             'text_colour_on_title_link': true,
                                             'title_size_small': 'gel-long-primer',
                                         },
@@ -150,10 +150,10 @@
                                         'cta_options': {
                                             'cta_class': 'cta br-box-secondary',
                                         },
-                                'link_location_prefix': 'clip_' ~ loop.index ~ '_',
-                                'body_options': {
-                                    'show_synopsis': programme.isRadio(),
-                                },
+                                        'link_location_prefix': 'clip_' ~ loop.index ~ '_',
+                                        'body_options': {
+                                            'show_synopsis': programme.isRadio(),
+                                        },
                                     })}}
 
                                     {%- if loop.last and programme.getAvailableClipsCount() > 4 -%}
@@ -164,13 +164,13 @@
 
 
                             {%- for gallery in galleries -%}
-                                <li class="grid__item brand-page-card {{ loop.last ? 'grid__item--column' : ''}}">
+                                <li class="grid__item tlec-page-card {{ loop.last ? 'grid__item--column' : ''}}">
                                     {{- ds_amen('group', gallery, {
-                                'context_programme': (programme.isRadio() and gallery.getParent()) ? gallery.getParent() : programme,
+                                        'context_programme': (programme.isRadio() and gallery.getParent()) ? gallery.getParent() : programme,
                                         'branding_name': 'secondary',
                                         'link_location_prefix': 'group_' ~ loop.index ~ '_',
                                         'title_options': {
-                                    'h_tag': 'h3',
+                                            'h_tag': 'h3',
                                             'text_colour_on_title_link': true,
                                             'title_size_small': 'gel-long-primer'
                                         },
@@ -198,15 +198,16 @@
                     {%- if supportingContentItems -%}
                         <ul class="grid">
                             {%- for supportingContentItem in supportingContentItems -%}
-                                <li class="grid__item brand-supporting-content">
+                                <li class="tlec-page-supporting-content grid__item">
                                     {{- ds_amen('supportingContent', supportingContentItem) -}}
                                 </li>
                             {%- endfor -%}
                         </ul>
                     {%- endif -%}
+
+                    {# TODO Regular Vote block #}
                 </div>
             </div>
-            {# TODO Regular Vote block #}
         </div>
     </div>
 
@@ -230,16 +231,6 @@
     {% endif %}
 
     {{ ds_amen('footer', programme, recommendations) }}
-    <script>
-        require(['orb/fig'], function(orbFig) {
-            orbFig.load(function(fig) {
-                if (!fig.geo.isUK()) {
-                    {# Add the ad-grid class only for non-uk browsers #}
-                    document.getElementById('brand-outer-grid').className += ' ad-grid';
-                }
-            });
-        });
-    </script>
 {% endblock %}
 
 {% macro trailing_link(route, translation, programme, link_location_prefix) %}
