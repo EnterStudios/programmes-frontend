@@ -4,6 +4,7 @@ namespace App\Controller\FindByPid;
 
 use App\Controller\BaseController;
 use App\Ds2013\PresenterFactory;
+use App\Ds2013\Presenters\Section\Segments\SegmentsPresenter;
 use App\ExternalApi\FavouritesButton\Service\FavouritesButtonService;
 use BBC\ProgrammesPagesService\Domain\Entity\Episode;
 use BBC\ProgrammesPagesService\Service\CollapsedBroadcastsService;
@@ -12,6 +13,7 @@ use BBC\ProgrammesPagesService\Service\ProgrammesAggregationService;
 use BBC\ProgrammesPagesService\Service\ProgrammesService;
 use BBC\ProgrammesPagesService\Service\PromotionsService;
 use BBC\ProgrammesPagesService\Service\RelatedLinksService;
+use BBC\ProgrammesPagesService\Service\SegmentEventsService;
 use BBC\ProgrammesPagesService\Service\VersionsService;
 use GuzzleHttp\Promise\FulfilledPromise;
 
@@ -27,8 +29,12 @@ class EpisodeController extends BaseController
         CollapsedBroadcastsService $collapsedBroadcastsService,
         FavouritesButtonService $favouritesButtonService,
         VersionsService $versionsService,
+        SegmentEventsService $segmentEventsService,
         PresenterFactory $presenterFactory
     ) {
+        $segmentEvents = $segmentEventsService->findByProgrammeItemUsingOriginalVersion($episode);
+        $segmentsPresenter = new SegmentsPresenter($segmentEvents);
+
         $this->setIstatsProgsPageType('programmes_episode');
         $this->setContextAndPreloadBranding($episode);
 
