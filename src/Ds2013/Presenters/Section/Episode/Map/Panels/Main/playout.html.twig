@@ -6,7 +6,7 @@
             {{ self.image(playout) }}
         {% else %}
             {% if playout.isAvailableForStreaming() %}
-                <a class="playout__blocklink" href="{{ playout.getUrl() }}">
+                <a class="playout__blocklink" data-linktrack="programmes_iplayer_episodepage_playcurrent_calltoaction" href="{{ playout.getUrl() }}">
                     {{ self.image(playout) }}
                     <div class="playout__overlay">
                         <div class="playout__message playout__message--icon">
