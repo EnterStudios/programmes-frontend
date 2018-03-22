@@ -195,7 +195,7 @@ class StructuredDataHelperTest extends TestCase
             'parent' => SeriesBuilder::any()->build(),
         ])->build();
 
-        $containerSchema = $this->helper()->getSchemaForProgrammeContainer($series);
+        $containerSchema = $this->helper->getSchemaForProgrammeContainer($series);
 
         $this->assertKeys([
             '@type',

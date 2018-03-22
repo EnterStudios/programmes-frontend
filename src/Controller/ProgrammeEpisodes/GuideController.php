@@ -86,11 +86,18 @@ class GuideController extends BaseProgrammeEpisodesController
         foreach ($children as $child) {
             if ($child instanceof Series) {
                 $schemaContext['containsSeason'][] = $structuredDataHelper->getSchemaForProgrammeContainer($child);
-            } elseif (isset($upcomingBroadcast[(string) $child->getPid()])) {
-                $schemaContext['episode'][] = $structuredDataHelper->getSchemaForCollapsedBroadcast($upcomingBroadcast[(string) $child->getPid()]);
-            } elseif ($child->isStreamable()) {
-                $schemaContext['episode'][] = $structuredDataHelper->getSchemaForOnDemand($child);
             } else {
+                $episodeSchema = $structuredDataHelper->getSchemaForEpisode($child, false);
+                $cb = $od = null;
+                if (isset($upcomingBroadcast[(string) $child->getPid()])) {
+                    $cb = $structuredDataHelper->getSchemaForCollapsedBroadcast($upcomingBroadcast[(string) $child->getPid()]);
+                }
+                if ($child->isStreamable()) {
+                    $od = $structuredDataHelper->getSchemaForOnDemand($child);
+                }
+                if ($cb || $od) {
+                    $episodeSchema['publication'] = ($cb && $od) ? [$cb, $od] : ($cb ?? $od);
+                }
                 $schemaContext['episode'][] = $structuredDataHelper->getSchemaForEpisode($child, false);
             }
         }
