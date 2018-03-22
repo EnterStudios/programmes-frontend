@@ -97,16 +97,23 @@ class EpisodeController extends BaseController
             $favouritesButtonPromise = $favouritesButtonService->getContent();
         }
 
+        $segmentsPresenter = null;
         $versions = $versionsService->findByProgrammeItem($episode);
-        $canonicalVersion = $canonicalVersionHelper->getCanonicalVersion($versions);
-        $segmentEvents = $segmentEventsService->findByVersionWithContributions($canonicalVersion);
-        $segmentsPresenter = $presenterFactory->segmentItemsPresenter(
-            $episode,
-            $segmentEvents,
-            !empty($upcomingBroadcasts) ? reset($upcomingBroadcasts) : null,
-            !empty($lastOnBroadcasts) ? reset($lastOnBroadcasts) : null,
-            []
-        );
+        if ($versions) {
+            $canonicalVersion = $canonicalVersionHelper->getCanonicalVersion($versions);
+            if ($canonicalVersion) {
+                $segmentEvents = $segmentEventsService->findByVersionWithContributions($canonicalVersion);
+                if ($segmentEvents) {
+                    $segmentsPresenter = $presenterFactory->segmentItemsPresenter(
+                        $episode,
+                        $segmentEvents,
+                        !empty($upcomingBroadcasts) ? reset($upcomingBroadcasts) : null,
+                        !empty($lastOnBroadcasts) ? reset($lastOnBroadcasts) : null,
+                        []
+                    );
+                }
+            }
+        }
 
         $resolvedPromises = $this->resolvePromises(['favouritesButton' => $favouritesButtonPromise]);
 

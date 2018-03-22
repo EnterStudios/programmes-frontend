@@ -51,27 +51,24 @@ class SegmentsListPresenter extends Presenter
     {
         $hasChapterSegments = false;
         $hasMusicSegments = false;
-        $hasSpeechSegments = false;
 
         foreach ($this->segmentEvents as $segmentEvent) {
             if ($segmentEvent->getSegment() instanceof MusicSegment) {
                 $hasMusicSegments = true;
             } elseif ($segmentEvent->getSegment()->getType() === 'chapter') {
                 $hasChapterSegments = true;
-            } elseif ($segmentEvent->getSegment()->getType() === 'speech') {
-                $hasSpeechSegments = true;
             }
         }
 
         if ($hasMusicSegments) {
-            if (!$hasChapterSegments && !$hasSpeechSegments) {
+            if (!$hasChapterSegments) {
                 return 'music_played';
             }
 
             return 'music_and_featured';
         }
 
-        if ($hasChapterSegments && !$hasSpeechSegments) {
+        if ($hasChapterSegments) {
             return 'chapters';
         }
 
@@ -131,17 +128,17 @@ class SegmentsListPresenter extends Presenter
         return $segmentEvents;
     }
 
-    private function createSegmentItemPresenters(array $segmentEvents): array
+    public function getSegmentItemsPresenters(): array
     {
         $totalCount = count($this->segmentEvents);
         $groups = [];
 
         $group = [];
-        $previousTitle = reset($segmentEvents)->getTitle();
+        $previousTitle = reset($this->segmentEvents)->getTitle();
 
         // We use the index and call it 'relative offset' here because we could
         // have reversed the array in case of music segments for live programme debuts.
-        foreach ($segmentEvents as $relativeOffset => $segmentEvent) {
+        foreach ($this->segmentEvents as $relativeOffset => $segmentEvent) {
             // null, empty or different titles mean new group
             if (empty($previousTitle) || $segmentEvent->getTitle() != $previousTitle) {
                 $groups[] = $group;

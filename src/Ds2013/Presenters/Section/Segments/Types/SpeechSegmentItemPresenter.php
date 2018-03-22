@@ -5,5 +5,8 @@ namespace App\Ds2013\Presenters\Section\Segments\Types;
 
 class SpeechSegmentItemPresenter extends AbstractSegmentItemPresenter
 {
-
+    public function getType(): string
+    {
+        return 'Speech Segment';
+    }
 }

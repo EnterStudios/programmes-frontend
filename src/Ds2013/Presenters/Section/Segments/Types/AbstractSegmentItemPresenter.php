@@ -15,4 +15,6 @@ abstract class AbstractSegmentItemPresenter extends Presenter
     {
         parent::__construct($options);
     }
+
+    abstract public function getType(): string;
 }

@@ -1,4 +1,7 @@
+{% import _self as self %}
+
 {% if segments_list.getSegmentEvents() %}
+    {% set id = 'moreless' %}
     <div class="component component--box component--box-flushbody-vertical component--box--primary"
          id="segments">
         <div class="component__header br-box-page">
@@ -6,8 +9,49 @@
         </div>
         <div class="component__body br-box-page">
             <div class="segments-list {{ segments_list.getMorelessClass() }}">
+                {# TODO timing intro #}
+                {% if segments_list.hasMoreless() %}
+                    <input class="ml__status" id="{{ id }}" type="checkbox" checked>
 
+                    <ul class="list-unstyled segments-list__items ml__content">
+                        {{ self.segment_items(self, segments_list) }}
+                    </ul>
+
+                    <label class="ml__button island text--center br-box-highlight" for="{{ id }}">
+                        <span class="br-pseudolink">
+                            <span class="ml__label--more">{{ tr('show_more') }}</span>
+                            <span class="ml__label--sep"> / </span>
+                            <span class="ml__label--less">{{ tr('show_less') }}</span>
+                        </span>
+                    </label>
+                {% else %}
+                    <ul class="list-unstyled segments-list__items">
+                        {{ self.segment_items(self, segments_list) }}
+                    </ul>
+                {% endif %}
+                {# TODO playlister #}
             </div>
         </div>
     </div>
 {% endif %}
+
+{% macro segment_items(self, segment_list) %}
+    {% for segment_item in segment_list.getSegmentItemsPresenters() %}
+        {% if segment_item|length > 1 %}
+            <li class="segments-list__item segments-list__item--group br-keyline {{ segments_list.getMorelessClass() }}">
+                <h3>GROUP</h3>
+                <ul>
+                    {% for group_segment_item in segment_item %}
+                        {{ self.segment_item(segment_list, group_segment_item) }}
+                    {% endfor %}
+                </ul>
+            </li>
+        {% else %}
+            {{ self.segment_item(segment_list, segment_item[0]) }}
+        {% endif %}
+    {% endfor %}
+{% endmacro %}
+
+{% macro segment_item(segment_list, segment) %}
+    <li>{{ segment.getType() }}</li>
+{% endmacro %}
