@@ -4,7 +4,7 @@ namespace App\Controller\FindByPid;
 
 use App\Controller\BaseController;
 use App\Ds2013\PresenterFactory;
-use App\Ds2013\Presenters\Section\Segments\SegmentsPresenter;
+use App\DsShared\Helpers\CanonicalVersionHelper;
 use App\ExternalApi\FavouritesButton\Service\FavouritesButtonService;
 use BBC\ProgrammesPagesService\Domain\Entity\Episode;
 use BBC\ProgrammesPagesService\Service\CollapsedBroadcastsService;
@@ -30,11 +30,9 @@ class EpisodeController extends BaseController
         FavouritesButtonService $favouritesButtonService,
         VersionsService $versionsService,
         SegmentEventsService $segmentEventsService,
-        PresenterFactory $presenterFactory
+        PresenterFactory $presenterFactory,
+        CanonicalVersionHelper $canonicalVersionHelper
     ) {
-        $segmentEvents = $segmentEventsService->findByProgrammeItemUsingOriginalVersion($episode);
-        $segmentsPresenter = new SegmentsPresenter($segmentEvents);
-
         $this->setIstatsProgsPageType('programmes_episode');
         $this->setContextAndPreloadBranding($episode);
 
@@ -99,6 +97,17 @@ class EpisodeController extends BaseController
             $favouritesButtonPromise = $favouritesButtonService->getContent();
         }
 
+        $versions = $versionsService->findByProgrammeItem($episode);
+        $canonicalVersion = $canonicalVersionHelper->getCanonicalVersion($versions);
+        $segmentEvents = $segmentEventsService->findByVersionWithContributions($canonicalVersion);
+        $segmentsPresenter = $presenterFactory->segmentItemsPresenter(
+            $episode,
+            $segmentEvents,
+            !empty($upcomingBroadcasts) ? reset($upcomingBroadcasts) : null,
+            !empty($lastOnBroadcasts) ? reset($lastOnBroadcasts) : null,
+            []
+        );
+
         $resolvedPromises = $this->resolvePromises(['favouritesButton' => $favouritesButtonPromise]);
 
         return $this->renderWithChrome('find_by_pid/episode.html.twig', [
@@ -110,6 +119,7 @@ class EpisodeController extends BaseController
             'promotions' => $promotions,
             'allBroadcasts' => $allBroadcasts,
             'episodeMapPresenter' => $episodeMapPresenter,
+            'segmentsPresenter' => $segmentsPresenter,
             'favouritesButton' => $resolvedPromises['favouritesButton'],
         ]);
     }

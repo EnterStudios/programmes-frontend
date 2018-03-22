@@ -15,6 +15,7 @@ use App\Ds2013\Presenters\Pages\Schedules\NoSchedule\NoSchedulePresenter;
 use App\Ds2013\Presenters\Section\Episode\Map\EpisodeMapPresenter;
 use App\Ds2013\Presenters\Section\EpisodesSubNav\EpisodesSubNavPresenter;
 use App\Ds2013\Presenters\Section\Footer\FooterPresenter;
+use App\Ds2013\Presenters\Section\Segments\SegmentsListPresenter;
 use App\Ds2013\Presenters\Utilities\Calendar\CalendarPresenter;
 use App\Ds2013\Presenters\Utilities\Credits\CreditsPresenter;
 use App\Ds2013\Presenters\Utilities\DateList\DateListPresenter;
@@ -27,6 +28,7 @@ use BBC\ProgrammesPagesService\Domain\Entity\Episode;
 use BBC\ProgrammesPagesService\Domain\Entity\Group;
 use BBC\ProgrammesPagesService\Domain\Entity\Programme;
 use BBC\ProgrammesPagesService\Domain\Entity\ProgrammeContainer;
+use BBC\ProgrammesPagesService\Domain\Entity\ProgrammeItem;
 use BBC\ProgrammesPagesService\Domain\Entity\Promotion;
 use BBC\ProgrammesPagesService\Domain\Entity\Service;
 use BBC\ProgrammesPagesService\Domain\ValueObject\Pid;
@@ -201,6 +203,23 @@ class PresenterFactory
             $versions,
             $nextEpisode,
             $previousEpisode
+        );
+    }
+
+    public function segmentItemsPresenter(
+        ProgrammeItem $programmeItem,
+        array $segmentEvents,
+        ?CollapsedBroadcast $upcoming,
+        ?CollapsedBroadcast $lastOn,
+        array $options = []
+    ): SegmentsListPresenter {
+        return new SegmentsListPresenter(
+            $this->helperFactory->getLiveBroadcastHelper(),
+            $programmeItem,
+            $segmentEvents,
+            $upcoming,
+            $lastOn,
+            $options
         );
     }
 

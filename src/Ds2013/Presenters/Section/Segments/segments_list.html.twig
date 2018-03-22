@@ -1,0 +1,13 @@
+{% if segments_list.getSegmentEvents() %}
+    <div class="component component--box component--box-flushbody-vertical component--box--primary"
+         id="segments">
+        <div class="component__header br-box-page">
+            <h2>{{ tr(segments_list.getTitle()) }}</h2>
+        </div>
+        <div class="component__body br-box-page">
+            <div class="segments-list {{ segments_list.getMorelessClass() }}">
+
+            </div>
+        </div>
+    </div>
+{% endif %}
