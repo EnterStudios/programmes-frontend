@@ -54,9 +54,7 @@ class CanonicalVersionHelper
                 $weighting = self::VERSION_PREFERENCE_WEIGHTINGS[$type];
             }
 
-            if (is_null($highest)) {
-                $highest = $weighting;
-            } elseif ($weighting > $highest) {
+            if (is_null($highest) || $weighting > $highest) {
                 $highest = $weighting;
             }
         }
