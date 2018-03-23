@@ -49,14 +49,14 @@
         {% set onairshown = false %}
         {% set showBackToTop = false %}
         {% for period_name, broadcast_in_period in schedules_by_day_page.getBroadcastsGroupedByPeriodOfDay() %}
-            <li id="{{ period_name }}" class="schedule-skip-link">
+            <li class="schedule-skip-link">
                 {% if showBackToTop %}
                     <a class="pull--right micro link-complex"
                        href="#top">{{ gelicon('basics', 'to-top', 'gelicon--centi gelicon--leading') }}<span
                             class="link-complex__target">{{ tr('back_to_top_of_page') }}</span></a>
                 {% endif %}
                 {% set showBackToTop = schedules_by_day_page.hasJumpLinks() %}
-                <h2 class="delta text--shout island--horizontal component">{{ tr('schedules_period_' ~ period_name) }}</h2>
+                <h2 id="{{ period_name }}" class="delta text--shout island--horizontal component">{{ tr('schedules_period_' ~ period_name) }}</h2>
                 <ol class="highlight-box-wrapper">
                     {# list of broadcasts in day period #}
                     {% for broadcast in broadcast_in_period %}
