@@ -44,11 +44,10 @@ class SegmentsListPresenter extends Presenter
         array $options = []
     ) {
         parent::__construct($options);
-        $this->segmentEvents = $segmentEvents;
         $this->liveBroadcastHelper = $liveBroadcastHelper;
         $this->context = $context;
         $this->collapsedBroadcast = $upcoming ?? $lastOn;
-        $this->segmentEvents = $this->filterSegmentEvents($context, $segmentEvents, $this->collapsedBroadcast);
+        $this->segmentEvents = $segmentEvents;
     }
 
     public function getTitle(): string
@@ -65,11 +64,11 @@ class SegmentsListPresenter extends Presenter
         }
 
         if ($hasMusicSegments) {
-            if (!$hasChapterSegments) {
-                return 'music_played';
+            if ($hasChapterSegments) {
+                return 'music_and_featured';
             }
 
-            return 'music_and_featured';
+            return 'music_played';
         }
 
         if ($hasChapterSegments) {
@@ -87,6 +86,7 @@ class SegmentsListPresenter extends Presenter
     public function getMorelessClass(): string
     {
         if ($this->hasMoreless()) {
+            // radio only hides segments on < 600px
             if ($this->context->isRadio()) {
                 return 'bpb1-ml';
             }
@@ -116,47 +116,10 @@ class SegmentsListPresenter extends Presenter
         return 'timings_start_of_programme';
     }
 
-    private function filterSegmentEvents(
-        ProgrammeItem $programmeItem,
-        array $segmentEvents,
-        ?CollapsedBroadcast $collapsedBroadcast
-    ): array {
-        if ($programmeItem->getOption('show_tracklist_inadvance')) {
-            return $segmentEvents;
-        }
-
-        // if the programme item is currently being broadcast for the first time, filter to only the segment events that
-        // have already started
-        if ($collapsedBroadcast && !$collapsedBroadcast->isRepeat() && $this->isLive($collapsedBroadcast)) {
-            $filteredSegmentEvents = [];
-            $currentOffset = (ApplicationTime::getTime())->diff($collapsedBroadcast->getStartAt());
-
-            $reverse = false;
-
-            foreach ($segmentEvents as $segmentEvent) {
-                if (!$reverse && $segmentEvent->getSegment() instanceof MusicSegment && $segmentEvent->getOffset()) {
-                    $reverse = true;
-                }
-
-                if (!$segmentEvent->getOffset() || $currentOffset <= $segmentEvent->getOffset()) {
-                    $segmentEvent[] = $segmentEvent;
-                }
-            }
-
-            // music segments that have offsets get reversed
-            if ($reverse) {
-                $this->isReversed = true;
-                $filteredSegmentEvents = array_reverse($filteredSegmentEvents);
-            }
-
-            return $filteredSegmentEvents;
-        }
-
-        return $segmentEvents;
-    }
-
     public function getSegmentItemsPresenters(): array
     {
+        $segmentEvents = $this->filterSegmentEvents();
+
         $groups = [];
         $totalCount = count($this->segmentEvents);
 
@@ -165,7 +128,7 @@ class SegmentsListPresenter extends Presenter
 
         // We use the index and call it 'relative offset' here because we could
         // have reversed the array in case of music segments for live programme debuts.
-        foreach ($this->segmentEvents as $relativeOffset => $segmentEvent) {
+        foreach ($segmentEvents as $relativeOffset => $segmentEvent) {
             // null, empty or different titles mean new group
             if (empty($previousTitle) || $segmentEvent->getTitle() != $previousTitle) {
                 if ($group) {
@@ -185,6 +148,41 @@ class SegmentsListPresenter extends Presenter
         }
 
         return $groups;
+    }
+
+    private function filterSegmentEvents(): array {
+        if ($this->context->getOption('show_tracklist_inadvance')) {
+            return $this->segmentEvents;
+        }
+
+        // if the programme item is currently being broadcast for the first time, filter to only the segment events that
+        // have already started
+        if ($this->collapsedBroadcast && !$this->collapsedBroadcast->isRepeat() && $this->isLive($this->collapsedBroadcast)) {
+            $filteredSegmentEvents = [];
+            $currentOffset = (ApplicationTime::getTime())->diff($this->collapsedBroadcast->getStartAt());
+
+            foreach ($this->segmentEvents as $segmentEvent) {
+                // music segments that have offsets get reversed
+                // check if we're already reversing to avoid checking all conditions again
+                if (!$this->isReversed && $segmentEvent->getSegment() instanceof MusicSegment && $segmentEvent->getOffset()) {
+                    $this->isReversed = true;
+                }
+
+                // things within the offset range, or that don't have offsets get displayed
+                if (!$segmentEvent->getOffset() || $currentOffset <= $segmentEvent->getOffset()) {
+                    $filteredSegmentEvents[] = $segmentEvent;
+                }
+            }
+
+            if ($this->isReversed) {
+                $this->isReversed = true;
+                $filteredSegmentEvents = array_reverse($filteredSegmentEvents);
+            }
+
+            return $filteredSegmentEvents;
+        }
+
+        return $this->segmentEvents;
     }
 
     private function createSegmentItem(
