@@ -9,6 +9,7 @@ use App\Ds2013\Presenters\Section\Segments\Types\MusicSegmentItemPresenter;
 use App\Ds2013\Presenters\Section\Segments\Types\SpeechSegmentItemPresenter;
 use App\DsShared\Helpers\LiveBroadcastHelper;
 use BBC\ProgrammesPagesService\Domain\ApplicationTime;
+use BBC\ProgrammesPagesService\Domain\Entity\Clip;
 use BBC\ProgrammesPagesService\Domain\Entity\CollapsedBroadcast;
 use BBC\ProgrammesPagesService\Domain\Entity\MusicSegment;
 use BBC\ProgrammesPagesService\Domain\Entity\ProgrammeItem;
@@ -30,6 +31,9 @@ class SegmentsListPresenter extends Presenter
 
     /** @var bool|null */
     private $isLive = null;
+
+    /** @var bool|null */
+    private $isReversed = false;
 
     public function __construct(
         LiveBroadcastHelper $liveBroadcastHelper,
@@ -90,6 +94,20 @@ class SegmentsListPresenter extends Presenter
         return count($this->segmentEvents) >= 6;
     }
 
+    public function hasTimingIntro(): bool
+    {
+        return !($this->programmeItem instanceof Clip) && $this->programmeItem->getOption('show_tracklist_timings');
+    }
+
+    public function getTimingIntroTranslationString(): string
+    {
+        if ($this->collapsedBroadcast && $this->collapsedBroadcast->getStartAt()->isFuture()) {
+            return 'timings_start_of_day';
+        }
+
+        return 'timings_start_of_programme';
+    }
+
     private function filterSegmentEvents(
         ProgrammeItem $programmeItem,
         array $segmentEvents,
@@ -119,6 +137,7 @@ class SegmentsListPresenter extends Presenter
 
             // music segments that have offsets get reversed
             if ($reverse) {
+                $this->isReversed = true;
                 $filteredSegmentEvents = array_reverse($filteredSegmentEvents);
             }
 
@@ -130,8 +149,8 @@ class SegmentsListPresenter extends Presenter
 
     public function getSegmentItemsPresenters(): array
     {
-        $totalCount = count($this->segmentEvents);
         $groups = [];
+        $totalCount = count($this->segmentEvents);
 
         $group = [];
         $previousTitle = reset($this->segmentEvents)->getTitle();
@@ -141,12 +160,14 @@ class SegmentsListPresenter extends Presenter
         foreach ($this->segmentEvents as $relativeOffset => $segmentEvent) {
             // null, empty or different titles mean new group
             if (empty($previousTitle) || $segmentEvent->getTitle() != $previousTitle) {
-                $groups[] = $group;
+                if ($group) {
+                    $groups[] = $group;
+                }
+
                 $group = [];
-            } else {
-                $group[] = $this->createSegmentItem($segmentEvent, $relativeOffset,$totalCount);
             }
 
+            $group[] = $this->createSegmentItem($segmentEvent, $relativeOffset,$totalCount);
             $previousTitle = $segmentEvent->getTitle();
         }
 

@@ -101,17 +101,15 @@ class EpisodeController extends BaseController
         $versions = $versionsService->findByProgrammeItem($episode);
         if ($versions) {
             $canonicalVersion = $canonicalVersionHelper->getCanonicalVersion($versions);
-            if ($canonicalVersion) {
-                $segmentEvents = $segmentEventsService->findByVersionWithContributions($canonicalVersion);
-                if ($segmentEvents) {
-                    $segmentsPresenter = $presenterFactory->segmentItemsPresenter(
-                        $episode,
-                        $segmentEvents,
-                        !empty($upcomingBroadcasts) ? reset($upcomingBroadcasts) : null,
-                        !empty($lastOnBroadcasts) ? reset($lastOnBroadcasts) : null,
-                        []
-                    );
-                }
+            $segmentEvents = $segmentEventsService->findByVersionWithContributions($canonicalVersion);
+            if ($segmentEvents) {
+                $segmentsPresenter = $presenterFactory->segmentItemsPresenter(
+                    $episode,
+                    $segmentEvents,
+                    !empty($upcomingBroadcasts) ? reset($upcomingBroadcasts) : null,
+                    !empty($lastOnBroadcasts) ? reset($lastOnBroadcasts) : null,
+                    []
+                );
             }
         }
 

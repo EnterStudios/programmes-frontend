@@ -9,7 +9,12 @@
         </div>
         <div class="component__body br-box-page">
             <div class="segments-list {{ segments_list.getMorelessClass() }}">
-                {# TODO timing intro #}
+                {% if segments_list.hasTimingIntro() %}
+                    <p class="no-margin segments-list__header br-keyline br-box-subtle">
+                        {{ tr(segments_list.getTimingIntroTranslationString()) }}
+                    </p>
+                {% endif %}
+
                 {% if segments_list.hasMoreless() %}
                     <input class="ml__status" id="{{ id }}" type="checkbox" checked>
 
