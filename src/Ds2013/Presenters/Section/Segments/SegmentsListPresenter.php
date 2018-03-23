@@ -32,9 +32,14 @@ class SegmentsListPresenter extends Presenter
     /** @var bool|null */
     private $isLive = null;
 
-    /** @var bool|null */
+    /**
+     * Is the list of segment events reversed
+     *
+     * @var bool
+     */
     private $isReversed = false;
 
+    /** @param $segmentEvents SegmentEvent[] */
     public function __construct(
         LiveBroadcastHelper $liveBroadcastHelper,
         ProgrammeItem $context,
@@ -86,8 +91,12 @@ class SegmentsListPresenter extends Presenter
     public function getMorelessClass(): string
     {
         // radio only hides segments on < 600px
-        if ($this->hasMoreless() && $this->context->isRadio()) {
-            return 'ml@bpb1';
+        if ($this->hasMoreless()) {
+            if ($this->context->isRadio()) {
+                return 'ml@bpb1';
+            }
+
+            return 'ml';
         }
 
         return '';
@@ -173,7 +182,6 @@ class SegmentsListPresenter extends Presenter
             }
 
             if ($this->isReversed) {
-                $this->isReversed = true;
                 $filteredSegmentEvents = array_reverse($filteredSegmentEvents);
             }
 

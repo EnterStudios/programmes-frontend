@@ -56,9 +56,7 @@ class CanonicalVersionHelper
 
             if (is_null($highest)) {
                 $highest = $weighting;
-            }
-
-            if ($weighting > $highest) {
+            } elseif ($weighting > $highest) {
                 $highest = $weighting;
             }
         }

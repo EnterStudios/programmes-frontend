@@ -37,23 +37,7 @@ class EpisodeController extends BaseController
         $this->setIstatsProgsPageType('programmes_episode');
         $this->setContextAndPreloadBranding($episode);
 
-        $segmentsListPresenter = null;
         $versions = $versionsService->findByProgrammeItem($episode);
-
-        if ($versions) {
-            $canonicalVersion = $canonicalVersionHelper->getCanonicalVersion($versions);
-            $segmentEvents = $segmentEventsService->findByVersionWithContributions($canonicalVersion);
-            if ($segmentEvents) {
-                $segmentsListPresenter = $presenterFactory->segmentsListPresenter(
-                    $episode,
-                    $segmentEvents,
-                    !empty($upcomingBroadcasts) ? reset($upcomingBroadcasts) : null,
-                    !empty($lastOnBroadcasts) ? reset($lastOnBroadcasts) : null,
-                    []
-                );
-            }
-        }
-
         $availableVersions = $this->getAvailableVersions($versions);
 
         $clips = [];
@@ -107,6 +91,21 @@ class EpisodeController extends BaseController
             $nextEpisode,
             $previousEpisode
         );
+
+        $segmentsListPresenter = null;
+        if ($versions) {
+            $canonicalVersion = $canonicalVersionHelper->getCanonicalVersion($versions);
+            $segmentEvents = $segmentEventsService->findByVersionWithContributions($canonicalVersion);
+            if ($segmentEvents) {
+                $segmentsListPresenter = $presenterFactory->segmentsListPresenter(
+                    $episode,
+                    $segmentEvents,
+                    !empty($upcomingBroadcasts) ? reset($upcomingBroadcasts) : null,
+                    !empty($lastOnBroadcasts) ? reset($lastOnBroadcasts) : null,
+                    []
+                );
+            }
+        }
 
         $favouritesButtonPromise = new FulfilledPromise(null);
         if ($episode->isRadio()) {
