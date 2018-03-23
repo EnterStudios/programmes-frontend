@@ -31,7 +31,7 @@ class CanonicalVersionHelper
             }
 
             if ($b->isStreamable()) {
-                $weightingB += self::STREAMABLE_WEIGHT;;
+                $weightingB += self::STREAMABLE_WEIGHT;
             }
 
             // should be ordered by descending, so B first

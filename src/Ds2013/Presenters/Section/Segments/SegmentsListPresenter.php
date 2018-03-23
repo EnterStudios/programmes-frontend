@@ -138,7 +138,8 @@ class SegmentsListPresenter extends Presenter
                 $group = [];
             }
 
-            $group[] = $this->createSegmentItem($segmentEvent, $relativeOffset,$totalCount);
+            $group[] = $this->createSegmentItem($segmentEvent, $relativeOffset, $totalCount);
+
             $previousTitle = $segmentEvent->getTitle();
         }
 
@@ -150,7 +151,8 @@ class SegmentsListPresenter extends Presenter
         return $groups;
     }
 
-    private function filterSegmentEvents(): array {
+    private function filterSegmentEvents(): array
+    {
         if ($this->context->getOption('show_tracklist_inadvance')) {
             return $this->segmentEvents;
         }
