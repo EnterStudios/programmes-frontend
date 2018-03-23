@@ -33,13 +33,19 @@ class SegmentsListPresenter extends Presenter
     private $isLive = null;
 
     /**
-     * Is the list of segment events reversed
+     * Has the list of segment events been reversed?
      *
      * @var bool
      */
     private $isReversed = false;
 
-    /** @param $segmentEvents SegmentEvent[] */
+    /**
+     * @param LiveBroadcastHelper $liveBroadcastHelper
+     * @param SegmentEvent[] $segmentEvents
+     * @param CollapsedBroadcast|null $upcoming
+     * @param CollapsedBroadcast|null $lastOn
+     * @param array $options
+     */
     public function __construct(
         LiveBroadcastHelper $liveBroadcastHelper,
         ProgrammeItem $context,
