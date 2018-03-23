@@ -37,6 +37,7 @@ class EpisodeController extends BaseController
         $this->setIstatsProgsPageType('programmes_episode');
         $this->setContextAndPreloadBranding($episode);
 
+        // TODO: After PROGRAMMES-6284 is done, we can just fetch the versions we actually need and this can go
         $versions = $versionsService->findByProgrammeItem($episode);
         $availableVersions = $this->getAvailableVersions($versions);
 
