@@ -7,6 +7,6 @@ class MusicSegmentItemPresenter extends AbstractSegmentItemPresenter
 {
     public function getType(): string
     {
-        return 'Music Segment';
+        return 'music';
     }
 }

@@ -24,7 +24,7 @@ class SegmentsListPresenter extends Presenter
     private $liveBroadcastHelper;
 
     /** @var ProgrammeItem */
-    private $programmeItem;
+    private $context;
 
     /** @var CollapsedBroadcast|null */
     private $collapsedBroadcast;
@@ -37,7 +37,7 @@ class SegmentsListPresenter extends Presenter
 
     public function __construct(
         LiveBroadcastHelper $liveBroadcastHelper,
-        ProgrammeItem $programmeItem,
+        ProgrammeItem $context,
         array $segmentEvents,
         ?CollapsedBroadcast $upcoming,
         ?CollapsedBroadcast $lastOn,
@@ -46,9 +46,9 @@ class SegmentsListPresenter extends Presenter
         parent::__construct($options);
         $this->segmentEvents = $segmentEvents;
         $this->liveBroadcastHelper = $liveBroadcastHelper;
-        $this->programmeItem = $programmeItem;
+        $this->context = $context;
         $this->collapsedBroadcast = $upcoming ?? $lastOn;
-        $this->segmentEvents = $this->filterSegmentEvents($programmeItem, $segmentEvents, $this->collapsedBroadcast);
+        $this->segmentEvents = $this->filterSegmentEvents($context, $segmentEvents, $this->collapsedBroadcast);
     }
 
     public function getTitle(): string
@@ -86,7 +86,15 @@ class SegmentsListPresenter extends Presenter
 
     public function getMorelessClass(): string
     {
-        return $this->hasMoreless() ? 'ml' : '';
+        if ($this->hasMoreless()) {
+            if ($this->context->isRadio()) {
+                return 'bpb1-ml';
+            }
+
+            return 'ml';
+        }
+
+        return '';
     }
 
     public function hasMoreless(): bool
@@ -96,7 +104,7 @@ class SegmentsListPresenter extends Presenter
 
     public function hasTimingIntro(): bool
     {
-        return !($this->programmeItem instanceof Clip) && $this->programmeItem->getOption('show_tracklist_timings');
+        return !($this->context instanceof Clip) && $this->context->getOption('show_tracklist_timings');
     }
 
     public function getTimingIntroTranslationString(): string
@@ -187,7 +195,7 @@ class SegmentsListPresenter extends Presenter
         $options = [];
 
         // If there are more than 6 segments and we're past the third one, we start hiding things
-        if ($relativeOffset > 3 && $totalCount >= 6) {
+        if ($relativeOffset > 2 && $totalCount >= 6) {
             $options['moreless_class'] = 'ml__hidden';
         }
 

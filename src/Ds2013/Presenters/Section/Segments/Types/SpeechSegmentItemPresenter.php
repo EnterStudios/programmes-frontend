@@ -7,6 +7,6 @@ class SpeechSegmentItemPresenter extends AbstractSegmentItemPresenter
 {
     public function getType(): string
     {
-        return 'Speech Segment';
+        return 'speech';
     }
 }
