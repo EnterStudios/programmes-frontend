@@ -85,13 +85,9 @@ class SegmentsListPresenter extends Presenter
 
     public function getMorelessClass(): string
     {
-        if ($this->hasMoreless()) {
-            // radio only hides segments on < 600px
-            if ($this->context->isRadio()) {
-                return 'bpb1-ml';
-            }
-
-            return 'ml';
+        // radio only hides segments on < 600px
+        if ($this->hasMoreless() && $this->context->isRadio()) {
+            return 'ml@bpb1';
         }
 
         return '';

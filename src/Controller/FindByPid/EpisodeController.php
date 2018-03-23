@@ -7,6 +7,7 @@ use App\Ds2013\PresenterFactory;
 use App\DsShared\Helpers\CanonicalVersionHelper;
 use App\ExternalApi\FavouritesButton\Service\FavouritesButtonService;
 use BBC\ProgrammesPagesService\Domain\Entity\Episode;
+use BBC\ProgrammesPagesService\Domain\Entity\Version;
 use BBC\ProgrammesPagesService\Service\CollapsedBroadcastsService;
 use BBC\ProgrammesPagesService\Service\ContributionsService;
 use BBC\ProgrammesPagesService\Service\ProgrammesAggregationService;
@@ -35,6 +36,25 @@ class EpisodeController extends BaseController
     ) {
         $this->setIstatsProgsPageType('programmes_episode');
         $this->setContextAndPreloadBranding($episode);
+
+        $segmentsListPresenter = null;
+        $versions = $versionsService->findByProgrammeItem($episode);
+
+        if ($versions) {
+            $canonicalVersion = $canonicalVersionHelper->getCanonicalVersion($versions);
+            $segmentEvents = $segmentEventsService->findByVersionWithContributions($canonicalVersion);
+            if ($segmentEvents) {
+                $segmentsListPresenter = $presenterFactory->segmentsListPresenter(
+                    $episode,
+                    $segmentEvents,
+                    !empty($upcomingBroadcasts) ? reset($upcomingBroadcasts) : null,
+                    !empty($lastOnBroadcasts) ? reset($lastOnBroadcasts) : null,
+                    []
+                );
+            }
+        }
+
+        $availableVersions = $this->getAvailableVersions($versions);
 
         $clips = [];
         if ($episode->getAvailableClipsCount() > 0) {
@@ -65,10 +85,6 @@ class EpisodeController extends BaseController
             $allBroadcasts = $collapsedBroadcastsService->findByProgrammeWithFullServicesOfNetworksList($episode, 100);
         }
 
-        $availableVersions = [];
-        if ($episode->isStreamableAlternatate() || $episode->isDownloadable()) {
-            $availableVersions = $versionsService->findAvailableByProgrammeItem($episode);
-        }
 
         // TODO check $episode->getPromotionsCount() once it is populated in
         // Faucet to potentially save on a DB query
@@ -97,22 +113,6 @@ class EpisodeController extends BaseController
             $favouritesButtonPromise = $favouritesButtonService->getContent();
         }
 
-        $segmentsPresenter = null;
-        $versions = $versionsService->findByProgrammeItem($episode);
-        if ($versions) {
-            $canonicalVersion = $canonicalVersionHelper->getCanonicalVersion($versions);
-            $segmentEvents = $segmentEventsService->findByVersionWithContributions($canonicalVersion);
-            if ($segmentEvents) {
-                $segmentsPresenter = $presenterFactory->segmentItemsPresenter(
-                    $episode,
-                    $segmentEvents,
-                    !empty($upcomingBroadcasts) ? reset($upcomingBroadcasts) : null,
-                    !empty($lastOnBroadcasts) ? reset($lastOnBroadcasts) : null,
-                    []
-                );
-            }
-        }
-
         $resolvedPromises = $this->resolvePromises(['favouritesButton' => $favouritesButtonPromise]);
 
         return $this->renderWithChrome('find_by_pid/episode.html.twig', [
@@ -124,8 +124,15 @@ class EpisodeController extends BaseController
             'promotions' => $promotions,
             'allBroadcasts' => $allBroadcasts,
             'episodeMapPresenter' => $episodeMapPresenter,
-            'segmentsPresenter' => $segmentsPresenter,
+            'segmentsListPresenter' => $segmentsListPresenter,
             'favouritesButton' => $resolvedPromises['favouritesButton'],
         ]);
+    }
+
+    private function getAvailableVersions(array $versions): array
+    {
+        return array_filter($versions, function (Version $version) {
+            return $version->isDownloadable() || $version->isStreamable();
+        });
     }
 }

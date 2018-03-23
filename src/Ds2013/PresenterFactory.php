@@ -206,7 +206,7 @@ class PresenterFactory
         );
     }
 
-    public function segmentItemsPresenter(
+    public function segmentsListPresenter(
         ProgrammeItem $programmeItem,
         array $segmentEvents,
         ?CollapsedBroadcast $upcoming,
