@@ -5,6 +5,7 @@ namespace Tests\App\Ds2013\Presenters\Section\Episode\Map\Panels\Main;
 
 use App\Ds2013\Presenters\Section\Episode\Map\Panels\Main\PlayoutPresenter;
 use App\DsShared\Helpers\LiveBroadcastHelper;
+use App\DsShared\Helpers\StreamUrlHelper;
 use BBC\ProgrammesPagesService\Data\ProgrammesDb\Entity\VersionType;
 use BBC\ProgrammesPagesService\Domain\Entity\CollapsedBroadcast;
 use BBC\ProgrammesPagesService\Domain\Entity\Episode;
@@ -22,6 +23,7 @@ class PlayoutPresenterTest extends TestCase
     private $router;
 
     private $liveBroadcastHelper;
+    private $streamUrlHelper;
 
     public function setUp()
     {
@@ -30,12 +32,13 @@ class PlayoutPresenterTest extends TestCase
         $routeCollectionBuilder->add('/iplayer/{pid}', '', 'iplayer_play');
         $this->router = new UrlGenerator($routeCollectionBuilder->build(), new RequestContext());
         $this->liveBroadcastHelper = $this->createMock(LiveBroadcastHelper::class);
+        $this->streamUrlHelper = $this->createMock(StreamUrlHelper::class);
     }
 
     /** @dataProvider getIconProvider */
     public function testGetIcon(Episode $episode, string $expected)
     {
-        $presenter = new PlayoutPresenter($this->liveBroadcastHelper, $this->router, $episode, null, null, []);
+        $presenter = new PlayoutPresenter($this->liveBroadcastHelper, $this->streamUrlHelper, $this->router, $episode, null, null, []);
         $this->assertEquals($expected, $presenter->getIcon());
     }
 
@@ -65,7 +68,7 @@ class PlayoutPresenterTest extends TestCase
 
         $collapsedBroadcast = $this->createConfiguredMock(CollapsedBroadcast::class, ['getStartAt' => $startAt]);
 
-        $presenter = new PlayoutPresenter($this->liveBroadcastHelper, $this->router, $episode, $collapsedBroadcast, null, []);
+        $presenter = new PlayoutPresenter($this->liveBroadcastHelper, $this->streamUrlHelper, $this->router, $episode, $collapsedBroadcast, null, []);
         $this->assertEquals($expected, $presenter->getNotAvailableTranslation());
     }
 
@@ -137,7 +140,7 @@ class PlayoutPresenterTest extends TestCase
         $episode = $this->createConfiguredMock(Episode::class, ['isStreamable' => $isStreamable]);
         $this->liveBroadcastHelper->method('isWatchableLive')->willReturn($isWatchableLive);
 
-        $presenter = new PlayoutPresenter($this->liveBroadcastHelper, $this->router, $episode, $collapsedBroadcast, null, []);
+        $presenter = new PlayoutPresenter($this->liveBroadcastHelper, $this->streamUrlHelper, $this->router, $episode, $collapsedBroadcast, null, []);
         $this->assertEquals($expected, $presenter->isAvailableForStreaming());
     }
 
@@ -159,7 +162,7 @@ class PlayoutPresenterTest extends TestCase
         $episode = $this->createConfiguredMock(Episode::class, ['isAudio' => $isAudio]);
         $this->liveBroadcastHelper->method('isWatchableLive')->willReturn($isWatchableLive);
         $collapsedBroadcast = $this->createMock(CollapsedBroadcast::class);
-        $presenter = new PlayoutPresenter($this->liveBroadcastHelper, $this->router, $episode, $collapsedBroadcast, null, []);
+        $presenter = new PlayoutPresenter($this->liveBroadcastHelper, $this->streamUrlHelper, $this->router, $episode, $collapsedBroadcast, null, []);
         $this->assertEquals($expected, $presenter->getAvailableTranslation());
     }
 
@@ -174,14 +177,15 @@ class PlayoutPresenterTest extends TestCase
     }
 
     /** @dataProvider getUrlProvider */
-    public function testGetUrl(string $expected, ?CollapsedBroadcast $cb, bool $isWatchableLive, bool $isRadio)
+    public function testGetUrl(string $expected, ?CollapsedBroadcast $cb, bool $isWatchableLive, string $route)
     {
         $this->liveBroadcastHelper->method('simulcastUrl')->willReturn('simulcastUrl');
         $this->liveBroadcastHelper->method('isWatchableLive')->willReturn($isWatchableLive);
 
-        $episode = $this->createConfiguredMock(Episode::class, ['isRadio' => $isRadio, 'getPid' => new Pid('b0000001')]);
+        $episode = $this->createConfiguredMock(Episode::class, ['getPid' => new Pid('b0000001')]);
+        $this->streamUrlHelper->method('getRouteForProgrammeItem')->willReturn($route);
 
-        $presenter = new PlayoutPresenter($this->liveBroadcastHelper, $this->router, $episode, $cb, null, []);
+        $presenter = new PlayoutPresenter($this->liveBroadcastHelper, $this->streamUrlHelper, $this->router, $episode, $cb, null, []);
 
         $this->assertEquals($expected, $presenter->getUrl());
     }
@@ -191,11 +195,11 @@ class PlayoutPresenterTest extends TestCase
         $cb = $this->createMock(CollapsedBroadcast::class);
 
         return [
-            'is watchable live returns simulcasturl' => ['simulcastUrl', $cb, true, false],
-            'not watchable live radio episode returns playspace url' => ['/playspace/b0000001', $cb, false, true],
-            'no collapsed broadcast so radio episode returns playspace url' => ['/playspace/b0000001', null, true, true],
-            'not watchable live non-radio episode returns iplayer url' => ['/iplayer/b0000001', $cb, false, false],
-            'no collapsed broadcast so non-radio episode returns iplayer url' => ['/iplayer/b0000001', null, true, false],
+            'is watchable live returns simulcasturl' => ['simulcastUrl', $cb, true, ''],
+            'not watchable live radio episode returns playspace url' => ['/playspace/b0000001', $cb, false, 'playspace_play'],
+            'no collapsed broadcast so radio episode returns playspace url' => ['/playspace/b0000001', null, true, 'playspace_play'],
+            'not watchable live non-radio episode returns iplayer url' => ['/iplayer/b0000001', $cb, false, 'iplayer_play'],
+            'no collapsed broadcast so non-radio episode returns iplayer url' => ['/iplayer/b0000001', null, true, 'iplayer_play'],
         ];
     }
 
@@ -218,7 +222,7 @@ class PlayoutPresenterTest extends TestCase
 
         $this->liveBroadcastHelper->method('isWatchableLive')->willReturn($isWatchableLive);
 
-        $presenter = new PlayoutPresenter($this->liveBroadcastHelper, $this->router, $episode, $cb, null, $versions);
+        $presenter = new PlayoutPresenter($this->liveBroadcastHelper, $this->streamUrlHelper, $this->router, $episode, $cb, null, $versions);
         $this->assertEquals($expected, $presenter->doesntHaveOverlay());
     }
 

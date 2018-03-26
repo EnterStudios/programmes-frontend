@@ -5,6 +5,7 @@ namespace Tests\App\Ds2013\Presenters\Domain\CoreEntity\Programme\SubPresenters;
 
 use App\Ds2013\Presenters\Domain\CoreEntity\Programme\SubPresenters\ProgrammeOverlayPresenter;
 use App\DsShared\Helpers\PlayTranslationsHelper;
+use App\DsShared\Helpers\StreamUrlHelper;
 use BBC\ProgrammesPagesService\Domain\Entity\Clip;
 use BBC\ProgrammesPagesService\Domain\Entity\Episode;
 use BBC\ProgrammesPagesService\Domain\Entity\ProgrammeItem;
@@ -19,6 +20,7 @@ class ProgrammeOverlayPresenterTest extends TestCase
     private $router;
 
     private $mockTranslationsHelper;
+    private $mockStreamUrlHelper;
 
     public function setUp()
     {
@@ -32,6 +34,7 @@ class ProgrammeOverlayPresenterTest extends TestCase
         );
 
         $this->mockTranslationsHelper = $this->createMock(PlayTranslationsHelper::class);
+        $this->mockStreamUrlHelper = $this->createMock(StreamUrlHelper::class);
     }
 
     /**
@@ -46,6 +49,7 @@ class ProgrammeOverlayPresenterTest extends TestCase
         $programmeOverlayPresenter = new ProgrammeOverlayPresenter(
             $this->router,
             $this->mockTranslationsHelper,
+            $this->mockStreamUrlHelper,
             $programme
         );
         $this->assertEquals($expectedResult, $programmeOverlayPresenter->getMediaIconName());
@@ -59,59 +63,36 @@ class ProgrammeOverlayPresenterTest extends TestCase
         ];
     }
 
-
     public function testGetPlaybackUrlIplayer()
     {
-        $programmeItem = $this->playbackUrlProgramme(Episode::class, 'b0000002', false, false);
+        $this->mockStreamUrlHelper->expects($this->once())->method('getRouteForProgrammeItem')->willReturn('iplayer_play');
+        $programmeItem = $this->playbackUrlProgramme(Episode::class, 'b0000002');
         $programmeOverlayPresenter = new ProgrammeOverlayPresenter(
             $this->router,
             $this->mockTranslationsHelper,
+            $this->mockStreamUrlHelper,
             $programmeItem
         );
         $this->assertEquals('http://localhost/iplayer/episode/b0000002', $programmeOverlayPresenter->getPlaybackUrl());
     }
 
-    /**
-     * @dataProvider playbackUrlProgrammesDataProvider
-     */
-    public function testGetPlaybackUrlProgrammes(ProgrammeItem $programmeItem, $expectedUrl)
+    public function testGetPlaybackUrlProgrammes()
     {
+        $programmeItem = $this->playbackUrlProgramme(Episode::class, 'b0000001');
+        $this->mockStreamUrlHelper->expects($this->once())->method('getRouteForProgrammeItem')->willReturn('find_by_pid');
         $programmeOverlayPresenter = new ProgrammeOverlayPresenter(
             $this->router,
             $this->mockTranslationsHelper,
+            $this->mockStreamUrlHelper,
             $programmeItem
         );
-        $this->assertEquals($expectedUrl, $programmeOverlayPresenter->getPlaybackUrl());
+        $this->assertEquals('http://localhost/programmes/b0000001#play', $programmeOverlayPresenter->getPlaybackUrl());
     }
 
-    public function playbackUrlProgrammesDataProvider()
-    {
-        return [
-            [// Radio episode
-                $this->playbackUrlProgramme(Episode::class, 'b0000001', true, true),
-                'http://localhost/programmes/b0000001#play', // Expected URL for programme
-            ],
-            [// Audio episode
-                $this->playbackUrlProgramme(Episode::class, 'b0000001', false, true),
-                'http://localhost/programmes/b0000001#play', // Expected URL for programme
-            ],
-            [// Radio clip
-                $this->playbackUrlProgramme(Clip::class, 'p0000003', true, true),
-                'http://localhost/programmes/p0000003#play', // Expected URL for programme
-            ],
-            [// TV Clip
-                $this->playbackUrlProgramme(Clip::class, 'p0000003', false, false),
-                'http://localhost/programmes/p0000003#play', // Expected URL for programme
-            ],
-        ];
-    }
-
-    private function playbackUrlProgramme(string $type, string $pid, bool $isRadio, bool $isAudio)
+    private function playbackUrlProgramme(string $type, string $pid)
     {
         $programme = $this->createMock($type);
         $programme->method('getPid')->willReturn(new Pid($pid));
-        $programme->method('isRadio')->willReturn($isRadio);
-        $programme->method('isAudio')->willReturn($isAudio);
         return $programme;
     }
 }

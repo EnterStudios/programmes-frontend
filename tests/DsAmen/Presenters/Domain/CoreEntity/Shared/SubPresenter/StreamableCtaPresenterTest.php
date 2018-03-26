@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Tests\App\DsAmen\Presenters\Domain\CoreEntity\Shared\SubPresenter;
 
 use App\DsAmen\Presenters\Domain\CoreEntity\Shared\SubPresenter\StreamableCtaPresenter;
+use App\DsShared\Helpers\StreamUrlHelper;
 use BBC\ProgrammesPagesService\Domain\Entity\Clip;
 use BBC\ProgrammesPagesService\Domain\Entity\ProgrammeItem;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -22,7 +23,7 @@ class StreamableCtaPresenterTest extends BaseSubPresenterTest
     /** @dataProvider getDurationProvider */
     public function testGetDuration(ProgrammeItem $programme, int $expected): void
     {
-        $ctaPresenter = new StreamableCtaPresenter($programme, $this->router);
+        $ctaPresenter = new StreamableCtaPresenter($this->createMock(StreamUrlHelper::class), $programme, $this->router);
         $this->assertSame($expected, $ctaPresenter->getDuration());
     }
 
@@ -48,6 +49,7 @@ class StreamableCtaPresenterTest extends BaseSubPresenterTest
         $mockClip->method('isTv')->willReturn($isTv);
 
         $ctaPresenter = new StreamableCtaPresenter(
+            $this->createMock(StreamUrlHelper::class),
             $mockClip,
             $this->router,
             [
@@ -71,7 +73,7 @@ class StreamableCtaPresenterTest extends BaseSubPresenterTest
     /** @dataProvider getMediaIconNameProvider */
     public function testGetMediaIconName(ProgrammeItem $programme, string $expected): void
     {
-        $ctaPresenter = new StreamableCtaPresenter($programme, $this->router);
+        $ctaPresenter = new StreamableCtaPresenter($this->createMock(StreamUrlHelper::class), $programme, $this->router);
         $this->assertSame($expected, $ctaPresenter->getMediaIconName());
     }
 
@@ -92,40 +94,16 @@ class StreamableCtaPresenterTest extends BaseSubPresenterTest
     public function testGetPlayTranslation(): void
     {
         $programme = $this->createMockTvEpisode();
-        $ctaPresenter = new StreamableCtaPresenter($programme, $this->router);
+        $ctaPresenter = new StreamableCtaPresenter($this->createMock(StreamUrlHelper::class), $programme, $this->router);
         $this->assertSame('', $ctaPresenter->getLabelTranslation(), 'None streamable CTA presenter has label translations');
     }
 
-    /** @dataProvider getUrlProvider */
-    public function testGetUrl(ProgrammeItem $programme, string $expected): void
+    public function testGetUrl(): void
     {
-        $ctaPresenter = new StreamableCtaPresenter($programme, $this->router);
-        $this->assertSame($expected, $ctaPresenter->getUrl());
-    }
-
-    public function getUrlProvider(): array
-    {
-        $tvEpisode = $this->createMockTvEpisode();
-        $audioTvEpisode = $this->createMockTvEpisode(true);
-        $radioEpisode = $this->createMockRadioEpisode();
-        $clip = $this->createMockClip();
-
-        return [
-            'TV Episode links to iPlayer' => [
-                $tvEpisode,
-                'http://localhost/iplayer/episode/' . $tvEpisode->getPid(),
-            ],
-            'Audio TV Episode links to find by pid' => [
-                $audioTvEpisode,
-                'http://localhost/programmes/' . $audioTvEpisode->getPid(),
-            ],
-            'Radio episode links to find by pid' => [
-                $radioEpisode,
-                'http://localhost/programmes/' . $radioEpisode->getPid(),
-            ],
-            'Clip links to find by pid' => [
-                $clip, 'http://localhost/programmes/' . $clip->getPid(),
-            ],
-        ];
+        $episode = $this->createMockTvEpisode();
+        $urlHelper = $this->createMock(StreamUrlHelper::class);
+        $urlHelper->expects($this->once())->method('getRouteForProgrammeItem')->with($episode)->willReturn('iplayer_play');
+        $ctaPresenter = new StreamableCtaPresenter($urlHelper, $episode, $this->router);
+        $ctaPresenter->getUrl();
     }
 }

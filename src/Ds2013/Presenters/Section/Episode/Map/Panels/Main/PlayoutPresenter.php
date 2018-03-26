@@ -46,7 +46,7 @@ class PlayoutPresenter extends Presenter
         $this->episode = $episode;
         $this->broadcast = $upcoming ?? $lastOn;
         $this->liveBroadcastHelper = $liveBroadcastHelper;
-        $this->streamUrlHelper = $liveBroadcastHelper;
+        $this->streamUrlHelper = $streamUrlHelper;
         $this->router = $router;
         $this->availableVersions = $availableVersions;
         $this->isWatchableLive = null;

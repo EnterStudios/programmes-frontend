@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Tests\App\DsAmen\Presenters\Domain\CoreEntity\Group\SubPresenter;
 
 use App\DsAmen\Presenters\Domain\CoreEntity\Group\SubPresenter\TitlePresenter;
+use App\DsShared\Helpers\StreamUrlHelper;
 use App\DsShared\Helpers\TitleLogicHelper;
 use BBC\ProgrammesPagesService\Domain\Entity\Gallery;
 use BBC\ProgrammesPagesService\Domain\ValueObject\Pid;
@@ -28,7 +29,7 @@ class TitlePresenterTest extends BaseSubPresenterTest
     public function testGetUrlReturnsFindByPidRoute()
     {
         $gallery = $this->createConfiguredMock(Gallery::class, ['getPid' => new Pid('g0000001')]);
-        $ctaPresenter = new TitlePresenter($gallery, $this->router, $this->mockTitleLogicHelper);
+        $ctaPresenter = new TitlePresenter($this->createMock(StreamUrlHelper::class), $gallery, $this->router, $this->mockTitleLogicHelper);
         $this->assertSame('http://localhost/programmes/g0000001', $ctaPresenter->getUrl());
     }
 }

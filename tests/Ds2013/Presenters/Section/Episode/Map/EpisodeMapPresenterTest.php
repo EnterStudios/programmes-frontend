@@ -16,6 +16,7 @@ use App\DsShared\Helpers\PlayTranslationsHelper;
 use App\Ds2013\Presenters\Section\Episode\Map\Panels\Side\EmptyPresenter;
 use App\Ds2013\Presenters\Section\Episode\Map\Panels\Side\MorePresenter;
 use App\Ds2013\Presenters\Section\Episode\Map\Panels\Side\TxPresenter;
+use App\DsShared\Helpers\StreamUrlHelper;
 use BBC\ProgrammesPagesService\Domain\Entity\Episode;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -115,6 +116,7 @@ class EpisodeMapPresenterTest extends TestCase
     {
         $playTranslationsHelper = $this->createMock(PlayTranslationsHelper::class);
         $liveBroadcastHelper = $this->createMock(LiveBroadcastHelper::class);
+        $streamUrlHelper = $this->createMock(StreamUrlHelper::class);
         $router = $this->createMock(UrlGeneratorInterface::class);
 
         if (!$onlyMorePanel && !$onlyTxPanel) {
@@ -122,7 +124,7 @@ class EpisodeMapPresenterTest extends TestCase
             $upcomingBroadcast = null;
             $lastOnBroadcast = null;
 
-            return new EpisodeMapPresenter($router, $liveBroadcastHelper, $playTranslationsHelper, $noTleoprogramme, $upcomingBroadcast, $lastOnBroadcast, [], null, null);
+            return new EpisodeMapPresenter($router, $liveBroadcastHelper, $streamUrlHelper, $playTranslationsHelper, $noTleoprogramme, $upcomingBroadcast, $lastOnBroadcast, [], null, null);
         }
 
         if ($onlyMorePanel && $onlyTxPanel) {
@@ -130,7 +132,7 @@ class EpisodeMapPresenterTest extends TestCase
             $upcomingBroadcast = CollapsedBroadcastBuilder::any()->with(['programmeItem' => $episode])->build();
             $lastOnBroadcast = CollapsedBroadcastBuilder::any()->with(['programmeItem' => $episode])->build();
 
-            return new EpisodeMapPresenter($router, $liveBroadcastHelper, $playTranslationsHelper, $episode, $upcomingBroadcast, $lastOnBroadcast, [], null, null);
+            return new EpisodeMapPresenter($router, $liveBroadcastHelper, $streamUrlHelper, $playTranslationsHelper, $episode, $upcomingBroadcast, $lastOnBroadcast, [], null, null);
         }
 
         if ($onlyTxPanel) {
@@ -138,7 +140,7 @@ class EpisodeMapPresenterTest extends TestCase
             $upcomingBroadcast = CollapsedBroadcastBuilder::any()->with(['programmeItem' => $episode])->build();
             $lastOnBroadcast = CollapsedBroadcastBuilder::any()->with(['programmeItem' => $episode])->build();
 
-            return new EpisodeMapPresenter($router, $liveBroadcastHelper, $playTranslationsHelper, $episode, $upcomingBroadcast, $lastOnBroadcast, [], null, null);
+            return new EpisodeMapPresenter($router, $liveBroadcastHelper, $streamUrlHelper, $playTranslationsHelper, $episode, $upcomingBroadcast, $lastOnBroadcast, [], null, null);
         }
 
         if ($onlyMorePanel) {
@@ -146,7 +148,7 @@ class EpisodeMapPresenterTest extends TestCase
             $upcomingBroadcast = null;
             $lastOnBroadcast = null;
 
-            return new EpisodeMapPresenter($router, $liveBroadcastHelper, $playTranslationsHelper, $episode, $upcomingBroadcast, $lastOnBroadcast, [], null, null);
+            return new EpisodeMapPresenter($router, $liveBroadcastHelper, $streamUrlHelper, $playTranslationsHelper, $episode, $upcomingBroadcast, $lastOnBroadcast, [], null, null);
         }
     }
 }

@@ -10,6 +10,7 @@ use App\Builders\ImageBuilder;
 use App\Builders\SeriesBuilder;
 use App\Builders\ServiceBuilder;
 use App\Controller\Helpers\SchemaHelper;
+use App\DsShared\Helpers\StreamUrlHelper;
 use BBC\ProgrammesPagesService\Domain\ValueObject\PartialDate;
 use BBC\ProgrammesPagesService\Domain\ValueObject\Pid;
 use BBC\ProgrammesPagesService\Domain\ValueObject\Synopses;
@@ -30,7 +31,7 @@ class SchemaHelperTest extends TestCase
         $router = $this->createConfiguredMock(UrlGeneratorInterface::class, [
             'generate' => 'this/url/was/stubbed',
         ]);
-        $this->helper = new SchemaHelper($router);
+        $this->helper = new SchemaHelper($router, $this->createMock(StreamUrlHelper::class));
     }
 
     public function testSchemaSeriesOutput()
@@ -162,12 +163,13 @@ class SchemaHelperTest extends TestCase
      */
     public function testTheUrlTryToGenerateTheUrlOfClipUsingThePidOFTheCLip()
     {
+        $streamUrlHelper = $this->createMock(StreamUrlHelper::class);
         $routerMock = $this->createMock(UrlGeneratorInterface::class);
         $routerMock->expects($this->once())->method('generate')->with('find_by_pid', ['pid' => new Pid('b00819mm')]);
 
         $clip = ClipBuilder::anyRadioClip()->with(['pid' => new Pid('b00819mm')])->build();
 
-        (new SchemaHelper($routerMock))->buildSchemaForClip($clip);
+        (new SchemaHelper($routerMock, $streamUrlHelper))->buildSchemaForClip($clip);
     }
 
     /**
@@ -211,7 +213,7 @@ class SchemaHelperTest extends TestCase
         ])->build();
 
         $schema = $this->helper->buildSchemaForClip($clip);
-        
+
         $this->assertArrayNotHasKey('releaseDate', $schema, 'releaseDate is an optional field: cannot exist if the clip has not a releaseDate');
     }
 }

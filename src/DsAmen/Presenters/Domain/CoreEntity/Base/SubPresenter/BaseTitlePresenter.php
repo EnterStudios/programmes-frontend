@@ -53,12 +53,13 @@ abstract class BaseTitlePresenter extends Presenter
         TitleLogicHelper $titleHelper,
         array $options = []
     ) {
+        $this->coreEntity = $coreEntity;
+
         parent::__construct($options);
 
         $this->router = $router;
         $this->streamUrlHelper = $streamUrlHelper;
         $this->titleHelper = $titleHelper;
-        $this->coreEntity = $coreEntity;
     }
 
     public function getBrandingClass(): string
@@ -102,9 +103,9 @@ abstract class BaseTitlePresenter extends Presenter
 
     public function getUrl(): string
     {
-        $route = $this->streamUrlHelper->getRouteForProgrammeItem($this->coreEntity);
-        if (!$this->getOption('force_iplayer_linking')) {
-            $route = 'find_by_pid';
+        $route = 'find_by_pid';
+        if ($this->getOption('force_iplayer_linking')) {
+            $route = $this->streamUrlHelper->getRouteForProgrammeItem($this->coreEntity);
         }
 
         return $this->router->generate($route, ['pid' => $this->coreEntity->getPid()], UrlGenerator::ABSOLUTE_URL);
@@ -121,6 +122,10 @@ abstract class BaseTitlePresenter extends Presenter
         }
 
         if (isset($options['truncation_length']) && !is_int($options['truncation_length'])) {
+            throw new InvalidOptionException('truncation_length option must be null or an integer. HINT: use null for unlimited title length');
+        }
+
+        if (isset($options['force_iplayer_linking']) && $options['force_iplayer_linking'] && !($this->coreEntity instanceof ProgrammeItem)) {
             throw new InvalidOptionException('truncation_length option must be null or an integer. HINT: use null for unlimited title length');
         }
     }
