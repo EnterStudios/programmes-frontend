@@ -72,7 +72,7 @@ class SegmentsListPresenterTest extends TestCase
         $seg7 = $this->createMock(SegmentEvent::class);
 
         $sixSegmentEvents = [$seg1, $seg2, $seg3, $seg4, $seg5, $seg6];
-        $sevenSegmentEvents = [$seg1, $seg2, $seg3, $seg4, $seg5, $seg6 ,$seg7];
+        $sevenSegmentEvents = [$seg1, $seg2, $seg3, $seg4, $seg5, $seg6, $seg7];
         $fiveSegmentEvents = [$seg1, $seg2, $seg3, $seg4, $seg5];
 
         $radioContext = $this->createConfiguredMock(ProgrammeItem::class, ['isRadio' => true]);
