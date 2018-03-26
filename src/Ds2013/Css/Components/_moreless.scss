@@ -104,3 +104,9 @@ $faq-answer-indent: 23px;
 
 @include moreless-setup();
 // TODO add per viewport options ml@gel3 etc when we need it
+
+@each $name in $gel-widths-breakpoints {
+    @include mq-range($name) {
+        @include moreless-setup('#{$name}-');
+    }
+}
