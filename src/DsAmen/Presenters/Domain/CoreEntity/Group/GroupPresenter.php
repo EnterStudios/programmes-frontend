@@ -51,6 +51,7 @@ class GroupPresenter extends BaseCoreEntityPresenter
     {
         $options = array_merge($this->subPresenterOptions('title_options'), $options);
         return new TitlePresenter(
+            $this->helperFactory->getStreamUrlHelper(),
             $this->coreEntity,
             $this->router,
             $this->helperFactory->getTitleLogicHelper(),

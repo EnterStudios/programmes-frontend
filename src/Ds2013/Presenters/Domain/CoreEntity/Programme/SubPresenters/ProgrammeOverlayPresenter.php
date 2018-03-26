@@ -4,7 +4,7 @@ namespace App\Ds2013\Presenters\Domain\CoreEntity\Programme\SubPresenters;
 
 use App\Ds2013\Presenters\Domain\CoreEntity\Programme\ProgrammePresenterBase;
 use App\DsShared\Helpers\PlayTranslationsHelper;
-use BBC\ProgrammesPagesService\Domain\Entity\Clip;
+use App\DsShared\Helpers\StreamUrlHelper;
 use BBC\ProgrammesPagesService\Domain\Entity\Episode;
 use BBC\ProgrammesPagesService\Domain\Entity\Image;
 use BBC\ProgrammesPagesService\Domain\Entity\Programme;
@@ -39,14 +39,19 @@ class ProgrammeOverlayPresenter extends ProgrammePresenterBase
     /** @var PlayTranslationsHelper */
     protected $playTranslationsHelper;
 
+    /** @var StreamUrlHelper */
+    protected $streamUrlHelper;
+
     public function __construct(
         UrlGeneratorInterface $router,
         PlayTranslationsHelper $playTranslationsHelper,
+        StreamUrlHelper $streamUrlHelper,
         Programme $programme,
         array $options = []
     ) {
         parent::__construct($router, $programme, $options);
         $this->playTranslationsHelper = $playTranslationsHelper;
+        $this->streamUrlHelper = $streamUrlHelper;
     }
 
     public function getAvailabilityInWords(): string
@@ -89,12 +94,11 @@ class ProgrammeOverlayPresenter extends ProgrammePresenterBase
             return '';
         }
 
-        $routeName = 'iplayer_play';
+        $routeName = $this->streamUrlHelper->getRouteForProgrammeItem($this->programme);
         $routeArguments = ['pid' => $this->programme->getPid()];
 
-        if ($this->programme->isRadio() || $this->programme->isAudio() || $this->programme instanceof Clip) {
-            // Radio programme. Link to programme page for now.
-            $routeName = 'find_by_pid';
+        if ($routeName === 'find_by_pid') {
+            // Clip or Radio programme. Link to programme page for now.
             $routeArguments['_fragment'] = 'play';
         }
 

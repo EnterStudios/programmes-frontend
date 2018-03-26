@@ -85,6 +85,7 @@ class ProgrammePresenter extends ProgrammePresenterBase
         return new ProgrammeOverlayPresenter(
             $this->router,
             $this->helperFactory->getPlayTranslationsHelper(),
+            $this->helperFactory->getStreamUrlHelper(),
             $this->programme,
             $this->subPresenterOptions('image_options')
         );

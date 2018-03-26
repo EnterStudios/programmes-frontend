@@ -64,6 +64,7 @@ class CollapsedBroadcastProgrammePresenter extends ProgrammePresenter
             $this->router,
             $this->helperFactory->getPlayTranslationsHelper(),
             $this->helperFactory->getLiveBroadcastHelper(),
+            $this->helperFactory->getStreamUrlHelper(),
             $this->collapsedBroadcast,
             $this->programme,
             $this->subPresenterOptions('image_options')

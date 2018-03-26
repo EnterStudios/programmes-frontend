@@ -4,9 +4,11 @@ declare(strict_types = 1);
 namespace App\DsAmen\Presenters\Domain\CoreEntity\Base\SubPresenter;
 
 use App\DsAmen\Presenter;
+use App\DsShared\Helpers\StreamUrlHelper;
 use App\DsShared\Helpers\TitleLogicHelper;
 use App\Exception\InvalidOptionException;
 use BBC\ProgrammesPagesService\Domain\Entity\CoreEntity;
+use BBC\ProgrammesPagesService\Domain\Entity\Group;
 use BBC\ProgrammesPagesService\Domain\Entity\Programme;
 use BBC\ProgrammesPagesService\Domain\Entity\ProgrammeItem;
 use Symfony\Component\Routing\Generator\UrlGenerator;
@@ -20,11 +22,14 @@ abstract class BaseTitlePresenter extends Presenter
     /** @var TitleLogicHelper */
     protected $titleHelper;
 
-    /** @var CoreEntity|ProgrammeItem */
+    /** @var Group|ProgrammeItem */
     protected $coreEntity;
 
     /** @var CoreEntity */
     protected $mainTitleProgramme;
+
+    /** @var StreamUrlHelper */
+    protected $streamUrlHelper;
 
     /** @var CoreEntity[] */
     protected $subTitlesProgrammes;
@@ -42,6 +47,7 @@ abstract class BaseTitlePresenter extends Presenter
     ];
 
     public function __construct(
+        StreamUrlHelper $streamUrlHelper,
         CoreEntity $coreEntity,
         UrlGeneratorInterface $router,
         TitleLogicHelper $titleHelper,
@@ -50,6 +56,7 @@ abstract class BaseTitlePresenter extends Presenter
         parent::__construct($options);
 
         $this->router = $router;
+        $this->streamUrlHelper = $streamUrlHelper;
         $this->titleHelper = $titleHelper;
         $this->coreEntity = $coreEntity;
     }
@@ -95,19 +102,12 @@ abstract class BaseTitlePresenter extends Presenter
 
     public function getUrl(): string
     {
-        if (!$this->getOption('force_iplayer_linking') || ($this->coreEntity instanceof ProgrammeItem && $this->coreEntity->isAudio())) {
-            return $this->router->generate(
-                'find_by_pid',
-                ['pid' => $this->coreEntity->getPid()],
-                UrlGenerator::ABSOLUTE_URL
-            );
+        $route = $this->streamUrlHelper->getRouteForProgrammeItem($this->coreEntity);
+        if (!$this->getOption('force_iplayer_linking')) {
+            $route = 'find_by_pid';
         }
 
-        return $this->router->generate(
-            'iplayer_play',
-            ['pid' => $this->coreEntity->getPid()],
-            UrlGenerator::ABSOLUTE_URL
-        );
+        return $this->router->generate($route, ['pid' => $this->coreEntity->getPid()], UrlGenerator::ABSOLUTE_URL);
     }
 
     protected function validateOptions(array $options): void

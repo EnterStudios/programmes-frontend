@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace App\DsAmen\Presenters\Domain\CoreEntity\Shared\SubPresenter;
 
 use App\DsAmen\Presenters\Domain\CoreEntity\Base\SubPresenter\BaseCtaPresenter;
+use App\DsShared\Helpers\StreamUrlHelper;
 use BBC\ProgrammesPagesService\Domain\Entity\CoreEntity;
 use BBC\ProgrammesPagesService\Domain\Entity\Episode;
 use BBC\ProgrammesPagesService\Domain\Entity\ProgrammeItem;
@@ -14,11 +15,14 @@ class StreamableCtaPresenter extends BaseCtaPresenter
     protected $additionalOptions = [
         'show_duration' => true,
     ];
+    /** @var StreamUrlHelper */
+    private $streamUrlHelper;
 
-    public function __construct(CoreEntity $coreEntity, UrlGeneratorInterface $router, array $options = [])
+    public function __construct(StreamUrlHelper $onDemandHelper, CoreEntity $coreEntity, UrlGeneratorInterface $router, array $options = [])
     {
         $options = array_merge($this->additionalOptions, $options);
         parent::__construct($coreEntity, $router, $options);
+        $this->streamUrlHelper = $onDemandHelper;
     }
 
     public function getMediaIconName(): string
@@ -56,16 +60,8 @@ class StreamableCtaPresenter extends BaseCtaPresenter
 
     public function getUrl(): string
     {
-        if ($this->coreEntity instanceof Episode && $this->coreEntity->isVideo()) {
-            return $this->router->generate(
-                'iplayer_play',
-                ['pid' => $this->coreEntity->getPid()],
-                UrlGeneratorInterface::ABSOLUTE_URL
-            );
-        }
-
         return $this->router->generate(
-            'find_by_pid',
+            $this->streamUrlHelper->getRouteForProgrammeItem($this->coreEntity),
             ['pid' => $this->coreEntity->getPid()],
             UrlGeneratorInterface::ABSOLUTE_URL
         );

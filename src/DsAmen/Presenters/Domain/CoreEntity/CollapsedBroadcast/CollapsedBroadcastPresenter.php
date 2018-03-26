@@ -15,6 +15,7 @@ use App\DsAmen\Presenters\Domain\CoreEntity\Shared\SubPresenter\ImagePresenter;
 use App\DsAmen\Presenters\Domain\CoreEntity\Shared\SubPresenter\StreamableCtaPresenter;
 use App\DsAmen\Presenters\Domain\CoreEntity\Shared\SubPresenter\TitlePresenter;
 use App\DsShared\Helpers\HelperFactory;
+use App\DsShared\Helpers\StreamUrlHelper;
 use App\Translate\TranslateProvider;
 use BBC\ProgrammesPagesService\Domain\Entity\CollapsedBroadcast;
 use BBC\ProgrammesPagesService\Domain\Entity\ProgrammeItem;
@@ -24,6 +25,9 @@ class CollapsedBroadcastPresenter extends BaseCoreEntityPresenter
 {
     /** @var CollapsedBroadcast */
     private $collapsedBroadcast;
+
+    /** @var StreamUrlHelper */
+    private $streamUrlHelper;
 
     /** @var TranslateProvider */
     private $translateProvider;
@@ -46,6 +50,7 @@ class CollapsedBroadcastPresenter extends BaseCoreEntityPresenter
         parent::__construct($collapsedBroadcast->getProgrammeItem(), $router, $helperFactory, $options);
 
         $this->collapsedBroadcast = $collapsedBroadcast;
+        $this->streamUrlHelper = $this->helperFactory->getStreamUrlHelper();
         $this->translateProvider = $translateProvider;
     }
 
@@ -75,6 +80,7 @@ class CollapsedBroadcastPresenter extends BaseCoreEntityPresenter
             }
 
             return new StreamableCtaPresenter(
+                $this->streamUrlHelper,
                 $this->coreEntity,
                 $this->router,
                 $options
@@ -110,6 +116,7 @@ class CollapsedBroadcastPresenter extends BaseCoreEntityPresenter
     {
         $options = array_merge($this->subPresenterOptions('title_options'), $options);
         return new TitlePresenter(
+            $this->streamUrlHelper,
             $this->coreEntity,
             $this->router,
             $this->helperFactory->getTitleLogicHelper(),

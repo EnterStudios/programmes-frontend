@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace App\Controller\Helpers;
 
+use App\DsShared\Helpers\StreamUrlHelper;
 use BBC\ProgrammesPagesService\Domain\Entity\BroadcastInfoInterface;
 use BBC\ProgrammesPagesService\Domain\Entity\Episode;
 use BBC\ProgrammesPagesService\Domain\Entity\Network;
@@ -24,9 +25,13 @@ class SchemaHelper
     /** @var UrlGeneratorInterface */
     private $router;
 
-    public function __construct(UrlGeneratorInterface $router)
+    /** @var StreamUrlHelper */
+    private $streamUrlHelper;
+
+    public function __construct(UrlGeneratorInterface $router, StreamUrlHelper $streamUrlHelper)
     {
         $this->router = $router;
+        $this->streamUrlHelper = $streamUrlHelper;
     }
 
     public function getSchemaForSeries(ProgrammeContainer $programme): array
@@ -80,7 +85,7 @@ class SchemaHelper
                 'name' => 'iPlayer',
             ],
             'duration' => (string) new ChronosInterval(null, null, null, null, null, null, $episode->getDuration()),
-            'url' => $this->router->generate('iplayer_play', ['pid' => $episode->getPid()], UrlGeneratorInterface::ABSOLUTE_URL),
+            'url' => $this->router->generate($this->streamUrlHelper->getRouteForProgrammeItem($episode), ['pid' => $episode->getPid()], UrlGeneratorInterface::ABSOLUTE_URL),
         ];
         if ($episode->getStreamableFrom()) {
             $event['startDate'] = $episode->getStreamableFrom()->format(DATE_ATOM);

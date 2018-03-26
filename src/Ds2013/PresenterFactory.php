@@ -194,6 +194,7 @@ class PresenterFactory
         return new EpisodeMapPresenter(
             $this->router,
             $this->helperFactory->getLiveBroadcastHelper(),
+            $this->helperFactory->getStreamUrlHelper(),
             $this->helperFactory->getPlayTranslationsHelper(),
             $programme,
             $upcomingCollapsedBroadcast,
