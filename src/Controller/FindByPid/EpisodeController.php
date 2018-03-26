@@ -5,6 +5,7 @@ namespace App\Controller\FindByPid;
 use App\Controller\BaseController;
 use App\Ds2013\PresenterFactory;
 use App\ExternalApi\FavouritesButton\Service\FavouritesButtonService;
+use App\ExternalApi\Recipes\Service\RecipesService;
 use BBC\ProgrammesPagesService\Domain\Entity\Episode;
 use BBC\ProgrammesPagesService\Service\CollapsedBroadcastsService;
 use BBC\ProgrammesPagesService\Service\ContributionsService;
@@ -27,7 +28,8 @@ class EpisodeController extends BaseController
         CollapsedBroadcastsService $collapsedBroadcastsService,
         FavouritesButtonService $favouritesButtonService,
         VersionsService $versionsService,
-        PresenterFactory $presenterFactory
+        PresenterFactory $presenterFactory,
+        RecipesService $recipesService
     ) {
         $this->setIstatsProgsPageType('programmes_episode');
         $this->setContextAndPreloadBranding($episode);
@@ -65,6 +67,8 @@ class EpisodeController extends BaseController
         if ($episode->isStreamableAlternatate() || $episode->isDownloadable()) {
             $availableVersions = $versionsService->findAvailableByProgrammeItem($episode);
         }
+
+        $recipes = $recipesService->fetchRecipesByPid((string) $episode->getPid())->wait();
 
         // TODO check $episode->getPromotionsCount() once it is populated in
         // Faucet to potentially save on a DB query
