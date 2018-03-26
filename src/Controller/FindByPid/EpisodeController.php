@@ -5,6 +5,7 @@ namespace App\Controller\FindByPid;
 use App\Controller\BaseController;
 use App\Ds2013\PresenterFactory;
 use App\ExternalApi\FavouritesButton\Service\FavouritesButtonService;
+use App\ExternalApi\Recipes\Domain\RecipesApiResult;
 use App\ExternalApi\Recipes\Service\RecipesService;
 use BBC\ProgrammesPagesService\Domain\Entity\Episode;
 use BBC\ProgrammesPagesService\Service\CollapsedBroadcastsService;
@@ -68,7 +69,6 @@ class EpisodeController extends BaseController
             $availableVersions = $versionsService->findAvailableByProgrammeItem($episode);
         }
 
-        $recipes = $recipesService->fetchRecipesByPid((string) $episode->getPid())->wait();
 
         // TODO check $episode->getPromotionsCount() once it is populated in
         // Faucet to potentially save on a DB query
