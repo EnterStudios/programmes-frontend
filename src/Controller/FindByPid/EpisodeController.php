@@ -79,6 +79,10 @@ class EpisodeController extends BaseController
         $nextEpisode = null;
         /** @var Episode|null $previousEpisode */
         $previousEpisode = null;
+
+        $upcomingBroadcast = !empty($upcomingBroadcasts) ? reset($upcomingBroadcasts) : null;
+        $lastOnBroadcast =  !empty($lastOnBroadcasts) ? reset($lastOnBroadcasts) : null;
+
         if (!$episode->isTleo()) {
             $nextEpisode = $programmesService->findNextSiblingByProgramme($episode);
             $previousEpisode = $programmesService->findPreviousSiblingByProgramme($episode);
@@ -87,8 +91,8 @@ class EpisodeController extends BaseController
         $episodeMapPresenter = $presenterFactory->episodeMapPresenter(
             $episode,
             $availableVersions,
-            !empty($upcomingBroadcasts) ? reset($upcomingBroadcasts) : null,
-            !empty($lastOnBroadcasts) ? reset($lastOnBroadcasts) : null,
+            $upcomingBroadcast,
+            $lastOnBroadcast,
             $nextEpisode,
             $previousEpisode
         );
@@ -96,15 +100,17 @@ class EpisodeController extends BaseController
         $segmentsListPresenter = null;
         if ($versions) {
             $canonicalVersion = $canonicalVersionHelper->getCanonicalVersion($versions);
-            $segmentEvents = $segmentEventsService->findByVersionWithContributions($canonicalVersion);
-            if ($segmentEvents) {
-                $segmentsListPresenter = $presenterFactory->segmentsListPresenter(
-                    $episode,
-                    $segmentEvents,
-                    !empty($upcomingBroadcasts) ? reset($upcomingBroadcasts) : null,
-                    !empty($lastOnBroadcasts) ? reset($lastOnBroadcasts) : null,
-                    []
-                );
+            if ($canonicalVersion->getSegmentEventCount()) {
+                $segmentEvents = $segmentEventsService->findByVersionWithContributions($canonicalVersion);
+                if ($segmentEvents) {
+                    $segmentsListPresenter = $presenterFactory->segmentsListPresenter(
+                        $episode,
+                        $segmentEvents,
+                        $upcomingBroadcast,
+                        $lastOnBroadcast,
+                        []
+                    );
+                }
             }
         }
 

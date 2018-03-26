@@ -41,6 +41,7 @@ class SegmentsListPresenter extends Presenter
 
     /**
      * @param LiveBroadcastHelper $liveBroadcastHelper
+     * @param ProgrammeItem $context
      * @param SegmentEvent[] $segmentEvents
      * @param CollapsedBroadcast|null $upcoming
      * @param CollapsedBroadcast|null $lastOn
